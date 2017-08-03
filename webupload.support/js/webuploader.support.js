@@ -69,7 +69,7 @@ function WebUploaderSupport(options) {
         removeFileWithItem: function (file) {
             var uploader = that.uploader;
             if(file) {
-                support.removeFileItem(support.get$Item(file));
+                support.removeFileItem(support.getItem(file));
                 if(uploader) {
                     uploader.removeFile(file.id, true);
                 }
@@ -106,12 +106,23 @@ function WebUploaderSupport(options) {
         thumbnailWidth: 150,
         thumbnailHeight: 150,
         fileSize: -1,  //文件总个数, -1时无限制
-        showPreview: function (uploader, $img, file) {   //显示文件中的预览效果
+        ratio: window.devicePixelRatio || 1,  //优化retina, 在retina下这个值是2
+        getActualThumbnailWidth: function () {
             var that = this;
-            // 优化retina, 在retina下这个值是2
-            var ratio = window.devicePixelRatio || 1;
+            var ratio = this.ratio;
+            return that.thumbnailWidth * ratio;
+        },
+        getActualThumbnailHeight: function () {
+            var that = this;
+            var ratio = this.ratio;
+            return that.thumbnailHeight * ratio;
+        },
+        showPreview: function (uploader, $item, $img, file) {   //显示文件中的预览效果
+            var that = this;
             // 缩略图大小
-            var thumbnailWidth = that.thumbnailWidth * ratio, thumbnailHeight = that.thumbnailHeight * ratio;
+            var thumbnailWidth = that.getActualThumbnailWidth(), thumbnailHeight = that.getActualThumbnailHeight();
+            that.setItemStyle($item);  //以缩略图大小设置item宽高
+
             uploader.makeThumb(file, function (error, src) {
                 if (error) {
                     var $replace = $('<div class="preview"></div>').css({
@@ -124,8 +135,15 @@ function WebUploaderSupport(options) {
                 $img.attr('src', src);
             }, thumbnailWidth, thumbnailHeight);
         },
-        get$Item: function (file) {  //获取$item
+        getItem: function (file) {  //获取$item
             return $("#" + file.id);
+        },
+        setItemStyle: function ($item) {  //设置缩略图所在容器的宽高,默认是均150px,用于加载文件预览时设置
+            if($item) {
+                var that = this;
+                var thumbnailWidth = that.getActualThumbnailWidth(), thumbnailHeight = that.getActualThumbnailHeight();
+                $item.css({width: thumbnailWidth, height: thumbnailHeight});  //以缩略图大小设置$item宽高
+            }
         },
         loadUploadFileBtnStyle: function () {  //用于加载上传按钮的样式
             var $fns = this.$fns;
@@ -154,7 +172,7 @@ function WebUploaderSupport(options) {
                 '<div class="progress"><div class="progress-bar"></div></div>' +
                 '</div>'
             );
-            that.showPreview(uploader, $item.find("img"), file);  //显示预览效果
+            that.showPreview(uploader, $item, $item.find("img"), file);  //显示预览效果
             $fileList.append($item);  //显示在文件列表中
             that.loadUploadFileBtnStyle();  //加载上传按钮样式
             $item.on("click", '.btn', function () {
@@ -171,7 +189,7 @@ function WebUploaderSupport(options) {
             this.loadUploadFileBtnStyle();
         },
         uploadProgress: function (file, percentage) {  //文件上传过程中创建进度条
-            var $item = this.get$Item(file);
+            var $item = this.getItem(file);
             $item.removeClass("retry");  //移除重试class
             var $percent = $item.find('.progress .progress-bar');
             $item.find('.file-delete, .preview-tips').addClass("uploading");  //隐藏删除按钮、提示文字
@@ -179,7 +197,7 @@ function WebUploaderSupport(options) {
             $percent.css('width', percentage * 100 + '%');
         },
         uploadComplete: function (file) {  //完成上传时，无论成功或者失败
-            var $item = this.get$Item(file);
+            var $item = this.getItem(file);
             $item.find('.progress').fadeOut();
             $item.find('.file-delete, .preview-tips').removeClass("uploading");  //显示删除按钮、提示文字
 
@@ -191,7 +209,7 @@ function WebUploaderSupport(options) {
             this.loadUploadFileBtnStyle();
         },
         uploadSuccess: function (file, data, callback, $chooseFileBtn, $uploadFileBtn) {   // 文件上传完成后
-            var $item = this.get$Item(file),
+            var $item = this.getItem(file),
                 $state = $item.find('.state');
             $item.find('.progress').hide();
             if (data.status) {  //上传成功时
@@ -252,7 +270,7 @@ function WebUploaderSupport(options) {
          */
         beforeFileQueuedCallback: function (that, result, edit, uploader, file, fileSize, currentFileSize) {},  //回调函数
         uploadError: function (file) {  //文件上传失败后
-            var $item = this.get$Item(file),
+            var $item = this.getItem(file),
                 $state = $item.find('.state');
             if (!$state.hasClass('error')) {
                 $state.attr("class", "state error");
@@ -342,11 +360,14 @@ function WebUploaderSupport(options) {
             that.loadChooseFileBtnStyle($chooseFileBtn, $uploadFileBtn);
         },
         serverFiles: [],  //加载服务端的数据,当前为 [{name:string, src: string, attrs: {}}]
-        init: function (data, $fileList, $chooseFileBtn, $uploadFileBtn) {
-            //初始化
+        init: function (data, $fileList, $chooseFileBtn, $uploadFileBtn) { //初始化服务端数据,及加载样式
+
             var that = this;
             var edit = that.edit;
             var $files = null;
+
+            var thumbnailHeight = that.getActualThumbnailHeight();
+            $fileList.css({"min-height": thumbnailHeight + 20});  //设置该区域最小高度为thumbnailHeight + 20px
 
             //加载服务端数据
             if(data && data.length > 0) {
@@ -362,6 +383,8 @@ function WebUploaderSupport(options) {
                     html += '<div class="progress"><div class="progress-bar"></div></div>' + '</div>';
 
                     var $item = $(html);
+
+                    that.setItemStyle($item);  //以缩略图大小设置$item宽高
 
                     if($item && item) {
                         var attrs = item.attrs;
