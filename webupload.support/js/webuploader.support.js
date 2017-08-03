@@ -1,8 +1,9 @@
 "use strict";
+//https://github.com/joker-pper/WebUploaderSupport.git
 /**
- * @param options key：support 自定义拓展属性（可以重写对应的属性,删除文件的逻辑可以重新进行实现）, 其他配置参考webuploader配置,优先级理论大于support的配置
+ * @param options key：support 自定义拓展属性（可以重写对应的属性,删除文件的逻辑可以重新进行实现.）, 其他配置参考webuploader配置,优先级理论大于support的配置
  */
-function WebuploaderSupport(options) {
+function WebUploaderSupport(options) {
     var that = this;
 
     var fileStatus =  {
@@ -15,7 +16,7 @@ function WebuploaderSupport(options) {
         invalid: "invalid",  //文件不合格，不能重试上传。会自动从队列中移除
         cancelled: "cancelled"  //文件被移除
     };
-    WebuploaderSupport.fileStatus = fileStatus;
+    WebUploaderSupport.fileStatus = fileStatus;
 
     var $fns = {
         log: function (content) {
@@ -106,12 +107,12 @@ function WebuploaderSupport(options) {
         thumbnailHeight: 150,
         fileSize: -1,  //文件总个数, -1时无限制
         showPreview: function (uploader, $img, file) {   //显示文件中的预览效果
-                var that = this;
-                // 优化retina, 在retina下这个值是2
-                var ratio = window.devicePixelRatio || 1;
-                // 缩略图大小
-                var thumbnailWidth = that.thumbnailWidth * ratio, thumbnailHeight = that.thumbnailHeight * ratio;
-                uploader.makeThumb(file, function (error, src) {
+            var that = this;
+            // 优化retina, 在retina下这个值是2
+            var ratio = window.devicePixelRatio || 1;
+            // 缩略图大小
+            var thumbnailWidth = that.thumbnailWidth * ratio, thumbnailHeight = that.thumbnailHeight * ratio;
+            uploader.makeThumb(file, function (error, src) {
                 if (error) {
                     var $replace = $('<div class="preview"></div>').css({
                         height: thumbnailHeight,
@@ -289,7 +290,7 @@ function WebuploaderSupport(options) {
         },
 
         getCurrentFileSize: function () {  //获取当前uploader实例中文件的个数
-            var fileStatus = WebuploaderSupport.fileStatus;
+            var fileStatus = WebUploaderSupport.fileStatus;
             var $fns = this.$fns;
             var initedSize = $fns.getFileSize(fileStatus.inited);  //初始状态个数
             var errorSize = $fns.getFileSize(fileStatus.error);  //上传失败个数
@@ -536,7 +537,7 @@ function WebuploaderSupport(options) {
 
 }
 
-WebuploaderSupport.prototype.upload = function () {
+WebUploaderSupport.prototype.upload = function () {
     var uploader = this.uploader;
     if(uploader) {
         uploader.upload();
@@ -544,7 +545,7 @@ WebuploaderSupport.prototype.upload = function () {
     this.$fns.logInfo();
 }
 //判断是否正在上传中
-WebuploaderSupport.prototype.isInProgress = function () {
+WebUploaderSupport.prototype.isInProgress = function () {
     var flag = false;
     var uploader = this.uploader;
     if(uploader) {
@@ -555,7 +556,7 @@ WebuploaderSupport.prototype.isInProgress = function () {
 }
 
 
-WebuploaderSupport.prototype.retry = function () {
+WebUploaderSupport.prototype.retry = function () {
     var uploader = this.uploader;
     if(uploader) {
         uploader.retry();
@@ -563,7 +564,7 @@ WebuploaderSupport.prototype.retry = function () {
     this.$fns.logInfo();
 }
 
-WebuploaderSupport.prototype.getSupports = function () {
+WebUploaderSupport.prototype.getSupports = function () {
     var supports = this.supports;
     return supports;
 }

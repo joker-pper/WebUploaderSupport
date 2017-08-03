@@ -79,19 +79,19 @@
 <script src="js/webuploader.support.js"></script>
 
 <script>
-    var w1 =new WebuploaderSupport({
+    var w1 = new WebUploaderSupport({
         server: "/webuploader-support/webUploader/save?path=webUploader",
         paste: document.body
         ,support:  {
             uploader: ".uploader.uploader1",  //上传区域容器选择器
             fileSize: 6,  //文件总个数, -1时无限制
             serverFiles: [
-                {"src":"/webuploader-support/webUploader/showFile?serverFile=true&path=\\webUploader\\1.jpg","name":"1.jpg","attrs":{"data-server-file":true,"data-delete-url":"/webuploader-support/webUploader/delete?serverFile=true&path=\\webUploader\\1.jpg","data-path":"\\webUploader\\1.jpg"}}
+                {"src":"../images/preview/1.jpg","name":"1.jpg","attrs":{"data-server-file":true,"data-delete-url":""}}
             ]
         }
     });
 
-    var w2 = new WebuploaderSupport({
+    var w2 = new WebUploaderSupport({
          server: "/webuploader-support/webUploader/save?path=webUploader"
         ,support: {
             fileSize: 1,
@@ -100,7 +100,7 @@
         }
     });
 
-    var w3 = new WebuploaderSupport({
+    var w3 = new WebUploaderSupport({
         server: "/webuploader-support/webUploader/save?path=webUploader"
         ,support: {
             uploader: ".uploader.uploader3",

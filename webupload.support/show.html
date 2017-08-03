@@ -44,15 +44,15 @@
 <script src="js/webuploader.support.js"></script>
 
 <script>
-    var w1 =new WebuploaderSupport({
+    var w1 = new WebUploaderSupport({
         server: "/webuploader-support/webUploader/save?path=webUploader",
         paste: document.body
         ,support:  {
             uploader: ".uploader.uploader1",  //上传区域容器选择器
             edit: false,
             serverFiles: [
-                {"src":"/webuploader-support/webUploader/showFile?serverFile=true&path=\\webUploader\\preview\\1.jpg","name":"1.jpg","attrs":{"data-server-file":true,"data-delete-url":"/webuploader-support/webUploader/delete?serverFile=true&path=\\webUploader\\preview\\1.jpg","data-path":"\\webUploader\\preview\\1.jpg"}}
-                ,{"src":"/webuploader-support/webUploader/showFile?serverFile=true&path=\\webUploader\\preview\\2.jpg","name":"2.jpg","attrs":{"data-server-file":true,"data-delete-url":"/webuploader-support/webUploader/delete?serverFile=true&path=\\webUploader\\preview\\2.jpg","data-path":"\\webUploader\\preview\\2.jpg"}}
+                {"src":"../images/preview/1.jpg","name":"1.jpg","attrs":{"data-server-file":true,"data-delete-url":"/webuploader-support/webUploader/delete?serverFile=true&path=\\webUploader\\preview\\1.jpg"}}
+                ,{"src":"../images/preview/2.jpg","name":"2.jpg","attrs":{"data-server-file":true,"data-delete-url":"/webuploader-support/webUploader/delete?serverFile=true&path=\\webUploader\\preview\\2.jpg"}}
             ]
         }
     });
