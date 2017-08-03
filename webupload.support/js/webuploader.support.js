@@ -229,6 +229,15 @@ function WebUploaderSupport(options) {
                 $item.addClass("retry");
             }
         },
+        uploadSuccessCallbck: function ($item, data) {  //上传文件成功时的回调,用于标识为服务端文件
+            if($item && data) {
+                var attrs = data.attrs;
+                for(var key in attrs) {
+                    $item.attr(key, attrs[key]);
+                }
+            }
+
+        },
         /***
          *
          * @param uploader
@@ -280,15 +289,7 @@ function WebUploaderSupport(options) {
             this.loadUploadFileBtnStyle();
         },
         uploadFinished: function () {},  //文件上传完后触发
-        uploadSuccessCallbck: function ($item, data) {  //上传文件成功时的回调,用于标识为服务端文件
-            if($item && data) {
-                var attrs = data.attrs;
-                for(var key in attrs) {
-                    $item.attr(key, attrs[key]);
-                }
-            }
 
-        },
         serverFileAttrName: "data-server-file",  //服务端文件的属性名称
         getIsServerFile: function ($item) {  //判断文件是否是服务端文件
             var val = $item && $item.attr(this.serverFileAttrName);
@@ -333,7 +334,7 @@ function WebUploaderSupport(options) {
             }
         },
         deleteServerFileAttrName: "data-delete-url",
-        deleteServerFile: function ($item, callback) {
+        deleteServerFile: function ($item, callback) {  //删除服务器文件
             var that = this;
             var url = $item && $item.attr(that.deleteServerFileAttrName);
             if(url) {
@@ -458,7 +459,7 @@ function WebUploaderSupport(options) {
 
     var multiple = support.multiple;
 
-    delete options.support;  //删除额外的suporrt属性
+    delete options.support;  //删除额外的support属性
 
     var $uploader = $(support.uploader),
         $chooseFileBtn = $uploader.find(support.chooseFileBtn),  //选择文件的按钮选择器
@@ -496,8 +497,10 @@ function WebUploaderSupport(options) {
     var currentOptions = $.extend(true, {}, defaultOption, options);  //当期webuploader的配置, options中的优先级最高
 
     if(document.all || window.ActiveXObject || "ActiveXObject" in window) {
-        currentOptions.paste = null;
-        $fns.log("ie is not support paste");
+        if(currentOptions.paste != null) {
+            currentOptions.paste = null;
+            $fns.log("ie is not support paste");
+        }
     }
 
     jQuery(function() {
