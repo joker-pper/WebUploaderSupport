@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Bootstrap uploader demo</title>
+
+    <!-- Bootstrap -->
+    <link href="../bootstrap/css/bootstrap.min.css" rel="stylesheet">
+
+    <link rel="stylesheet" type="text/css" href="../webuploader/webuploader.css">
+    <link rel="stylesheet" type="text/css" href="css/style.css">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+    <script src="https://cdn.bootcss.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+    <script src="https://cdn.bootcss.com/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+</head>
+<body>
+<div class="container">
+    <div class="uploader uploader1">
+        <div class="message">
+            可以尝试文件拖拽，使用QQ截屏工具，然后激活窗口后粘贴，或者点击选择图片按钮，来体验此demo。
+            <br />
+            <br />
+            个数为6,可编辑, 默认加载服务端数据.
+        </div>
+        <div class="wrapper">
+            <div class="file-list"></div>
+        </div>
+        <div class="actions">
+            <div  class="filePicker action">选择图片</div>
+            <button class="uploadFile action btn btn-default upload-btn disabled">上传图片</button>
+        </div>
+    </div>
+
+    <div class="uploader uploader2">
+        <div class="message">
+            可以尝试文件拖拽，或者点击选择图片按钮，来体验此demo。
+            <br />
+            <br />
+            个数为1,单选, 可编辑.
+        </div>
+        <div class="wrapper">
+            <div class="file-list"></div>
+        </div>
+        <div class="actions">
+            <div  class="filePicker action">选择图片</div>
+            <button class="uploadFile action btn btn-default upload-btn disabled">上传图片</button>
+
+        </div>
+    </div>
+
+    <div class="uploader uploader3">
+        <div class="message">
+            可以尝试文件拖拽，或者点击选择图片按钮，来体验此demo。
+            <br />
+            <br />
+
+            无上传按钮,个数无限制, 可以通过调用api方法进行保存 实例变量  w3.upload();
+        </div>
+        <div class="wrapper">
+            <div class="file-list"></div>
+        </div>
+        <div class="actions text-right">
+            <div  class="filePicker action">选择图片</div>
+        </div>
+    </div>
+</div>
+
+<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+<script src="../jquery.min.js"></script>
+<!-- Include all compiled plugins (below), or include individual files as needed -->
+<script src="../bootstrap/js/bootstrap.min.js"></script>
+<script src="../webuploader/webuploader.js"></script>
+<script src="js/webuploader.support.js"></script>
+
+<script>
+    var w1 =new WebuploaderSupport({
+        server: "/webuploader-support/webUploader/save?path=webUploader",
+        paste: document.body
+        ,support:  {
+            uploader: ".uploader.uploader1",  //上传区域容器选择器
+            fileSize: 6,  //文件总个数, -1时无限制
+            serverFiles: [
+                {"src":"/webuploader-support/webUploader/showFile?serverFile=true&path=\\webUploader\\1.jpg","name":"1.jpg","attrs":{"data-server-file":true,"data-delete-url":"/webuploader-support/webUploader/delete?serverFile=true&path=\\webUploader\\1.jpg","data-path":"\\webUploader\\1.jpg"}}
+            ]
+        }
+    });
+
+    var w2 = new WebuploaderSupport({
+         server: "/webuploader-support/webUploader/save?path=webUploader"
+        ,support: {
+            fileSize: 1,
+            multiple: false,
+            uploader: ".uploader.uploader2"
+        }
+    });
+
+    var w3 = new WebuploaderSupport({
+        server: "/webuploader-support/webUploader/save?path=webUploader"
+        ,support: {
+            uploader: ".uploader.uploader3",
+        }
+    });
+
+</script>
+</body>
+</html>
