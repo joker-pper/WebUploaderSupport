@@ -375,15 +375,32 @@ function WebUploaderSupport(options) {
                 for(var i in data) {
                     var item = data[i];
                     var html = '<div class="file-item thumbnail">' +
-                        '<div class="file-info">' + item.name + '</div>' +
-                        '<img src="'+ item.src+'"/>';
+                        '<div class="file-info">' + (item.name || "") + '</div>';
+
 
                     if(edit) {
                         html += '<div class="file-delete">' + '<button type="button" class="btn btn-info">' + '删除</button></div>';
                     }
+
                     html += '<div class="progress"><div class="progress-bar"></div></div>' + '</div>';
 
+                    var $preview;  //根据文件后缀进行展示预览结果
+
+                    if(item.name != null && /(.jpg|.png|.gif|.bmp|.jpeg)$/.test(item.name.toLocaleLowerCase())) {
+                        $preview = $('<img src="'+ item.src + '"/>');
+                    } else {
+                        var thumbnailWidth = that.getActualThumbnailWidth(), thumbnailHeight = that.getActualThumbnailHeight();
+                        $preview = $('<div class="preview"></div>').css({
+                            height: thumbnailHeight,
+                            width: thumbnailWidth
+                        }).append($('<div class="preview-tips">不能预览</div>'));
+                        if(!edit) {
+                            $preview.addClass("not-edit");
+                        }
+                    }
+
                     var $item = $(html);
+                    $item.append($preview);
 
                     that.setItemStyle($item);  //以缩略图大小设置$item宽高
 

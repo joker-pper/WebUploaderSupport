@@ -120,6 +120,11 @@
 .file-list .file-item:hover .preview-tips {
 	z-index: -1;
 }
+/*鼠标经过当前item时如果是不能编辑则不隐藏文字*/
+.file-list .file-item:hover .preview.not-edit .preview-tips {
+    z-index: 1;
+}
+
 
 
 .file-item .file-info {

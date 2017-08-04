@@ -32,7 +32,7 @@
             <div class="file-list"></div>
         </div>
         <div class="actions">
-            <div  class="filePicker action">选择图片</div>
+            <div class="filePicker action">选择图片</div>
             <button class="uploadFile action btn btn-default upload-btn disabled">上传图片</button>
         </div>
     </div>
@@ -66,7 +66,21 @@
             <div class="file-list"></div>
         </div>
         <div class="actions text-right">
-            <div  class="filePicker action">选择图片</div>
+            <div class="filePicker action">选择图片</div>
+        </div>
+    </div>
+
+
+    <div class="uploader uploader4">
+        <div class="message">
+            可以尝试文件拖拽，或者点击选择文件按钮，来体验此demo。
+        </div>
+        <div class="wrapper">
+            <div class="file-list"></div>
+        </div>
+        <div class="actions">
+            <div class="filePicker action">选择文件</div>
+            <button class="uploadFile action btn btn-default upload-btn disabled">上传文件</button>
         </div>
     </div>
 </div>
@@ -95,7 +109,7 @@
          server: "/webuploader-support/webUploader/save?path=webUploader"
         ,support: {
             fileSize: 1,
-            multiple: false,
+            multiple: false,  //单选
             uploader: ".uploader.uploader2"
         }
     });
@@ -106,6 +120,19 @@
 			thumbnailWidth: 180,
             thumbnailHeight: 180,
             uploader: ".uploader.uploader3",
+        }
+    });
+
+    //不限制文件类型
+    var w4 = new WebUploaderSupport({
+        server: "/webuploader-support/webUploader/save?path=webUploader"
+        ,accept: {
+            title: 'all',
+            extensions: '*',
+            mimeTypes: '*'
+        }
+        ,support: {
+            uploader: ".uploader.uploader4",
         }
     });
 
