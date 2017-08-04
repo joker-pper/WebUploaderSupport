@@ -35,9 +35,9 @@
 </head>
 <body>
 <div class="container">
-    <div class="uploader display-none">
+    <div class="uploader uploader1 display-none">
         <div class="message">
-            可以尝试文件拖拽，使用QQ截屏工具，然后激活窗口后粘贴(IE不支持)，或者点击选择图片按钮，来体验此demo。需要服务端运行,Edge可能不支持。
+            可以通过选择图片按钮（拖拽与粘贴没有效果），来体验此demo。需要服务端运行,Edge可能不支持。
         </div>
         <div class="wrapper">
             <div class="file-list"></div>
@@ -96,6 +96,7 @@
             var w1 = new WebUploaderSupport({
                 server: "/webuploader-support/webUploader/save?path=webUploader",
                 paste: document.body
+                ,uploader: ".uploader.uploader1"
                 ,runtimeOrder: "flash"  //强制使用flash
                 ,sendAsBinary: true  //二进制的流的方式发送文件
                 ,swf: '../webuploader/Uploader.swf'  // swf文件所处路径
