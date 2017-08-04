@@ -1,6 +1,12 @@
 # WebUploaderSupport
 进行一些配置便可以运行起来webuploader实例，已拥有一定的业务逻辑。可以进行覆盖对应的属性。
 
+demo演示地址
+
+https://joker-pper.github.io/WebUploaderSupport/webuploader.support/edit.html
+https://joker-pper.github.io/WebUploaderSupport/webuploader.support/show.html
+https://joker-pper.github.io/WebUploaderSupport/webuploader.support/flash.html
+
 WebUploaderSupport功能包括：
 
 #
