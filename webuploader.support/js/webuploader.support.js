@@ -109,12 +109,12 @@ function WebUploaderSupport(options) {
         ratio: window.devicePixelRatio || 1,  //优化retina, 在retina下这个值是2
         getActualThumbnailWidth: function () {
             var that = this;
-            var ratio = this.ratio;
+            var ratio = that.ratio;
             return that.thumbnailWidth * ratio;
         },
         getActualThumbnailHeight: function () {
             var that = this;
-            var ratio = this.ratio;
+            var ratio = that.ratio;
             return that.thumbnailHeight * ratio;
         },
         showPreview: function (uploader, $item, $img, file) {   //显示文件中的预览效果
@@ -520,11 +520,13 @@ function WebUploaderSupport(options) {
                 });
             }
 
-            uploader.on('fileQueued', function (file) {  //文件被添加进队列时
+            //文件被添加进队列时
+            uploader.on('fileQueued', function (file) {
                 support.fileQueued && support.fileQueued(uploader, file, $fileList, $uploadFileBtn, $chooseFileBtn, $fns.removeFileWithItem);
             });
 
-            uploader.on('fileDequeued', function (file) {  //移除文件时
+            //移除文件时
+            uploader.on('fileDequeued', function (file) {
                 support.fileDequeued && support.fileDequeued(uploader, file, $fileList, $uploadFileBtn);
             });
 
@@ -532,17 +534,18 @@ function WebUploaderSupport(options) {
                 support.uploadProgress && support.uploadProgress(file, percentage);
             });
 
+            //完成上传时，无论成功或者失败
             uploader.on('uploadComplete', function (file) {
                 support.uploadComplete && support.uploadComplete(file);
             });
 
 
-            // 文件上传完成后，添加相应的样式
+            // 文件上传完成后，添加相应的样式(响应成功)
             uploader.on('uploadSuccess', function (file, data) {
                 support.uploadSuccess && support.uploadSuccess(file, data, support.uploadSuccessCallbck, $chooseFileBtn, $uploadFileBtn);
             });
 
-            // 文件上传失败，显示上传出错
+            // 文件上传失败，显示上传出错（上传失败出现错误状态码时）
             uploader.on('uploadError', function (file) {
                 support.uploadError && support.uploadError(file);
             });
@@ -553,6 +556,7 @@ function WebUploaderSupport(options) {
 
             });
 
+            //当前uploader实例文件上传完成后触发
             uploader.on("uploadFinished", function () {
                 support.uploadFinished && support.uploadFinished();
             });
@@ -563,6 +567,7 @@ function WebUploaderSupport(options) {
 
 }
 
+//上传该uploader实例的文件
 WebUploaderSupport.prototype.upload = function () {
     var uploader = this.uploader;
     if(uploader) {

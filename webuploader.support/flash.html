@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Bootstrap uploader flash demo</title>
+
+    <!-- Bootstrap -->
+    <link href="../bootstrap/css/bootstrap.min.css" rel="stylesheet">
+
+    <link rel="stylesheet" type="text/css" href="../webuploader/webuploader.css">
+    <link rel="stylesheet" type="text/css" href="css/style.css">
+
+    <style type="text/css">
+        .display-none {
+            display: none;
+        }
+        .uploader + p {
+            padding: 15px;
+        }
+
+        .uploader.display-none + p {
+            margin-top: 15px;
+        }
+
+    </style>
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+    <script src="https://cdn.bootcss.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+    <script src="https://cdn.bootcss.com/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+</head>
+<body>
+<div class="container">
+    <div class="uploader display-none">
+        <div class="message">
+            可以尝试文件拖拽，使用QQ截屏工具，然后激活窗口后粘贴(IE不支持)，或者点击选择图片按钮，来体验此demo。需要服务端运行,Edge可能不支持。
+        </div>
+        <div class="wrapper">
+            <div class="file-list"></div>
+        </div>
+        <div class="actions">
+            <div  class="filePicker action">选择图片</div>
+            <button class="uploadFile action btn btn-default upload-btn disabled">上传图片</button>
+        </div>
+    </div>
+
+</div>
+
+<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+<script src="../jquery.min.js"></script>
+<!-- Include all compiled plugins (below), or include individual files as needed -->
+<script src="../bootstrap/js/bootstrap.min.js"></script>
+<script src="../webuploader/webuploader.js"></script>
+<script src="js/webuploader.support.js"></script>
+
+<script>
+
+    function flashChecker() {
+        var hasFlash = 0; //是否安装了flash
+        var flashVersion = 0; //flash版本
+        if (document.all) {
+            var swf = new ActiveXObject('ShockwaveFlash.ShockwaveFlash');
+            if (swf) {
+                hasFlash = 1;
+                var VSwf = swf.GetVariable("$version");
+                flashVersion = parseInt(VSwf.split(" ")[1].split(",")[0]);
+            }
+        } else {
+            if (navigator.plugins && navigator.plugins.length > 0) {
+                var swf = navigator.plugins["Shockwave Flash"];
+                if (swf) {
+                    hasFlash = 1;
+                    var words = swf.description.split(" ");
+                    for (var i = 0; i < words.length; ++i) {
+                        if (isNaN(parseInt(words[i]))) continue;
+                        flashVersion = parseInt(words[i]);
+                    }
+                }
+            }
+        }
+        return { f: hasFlash, v: flashVersion };
+    }
+    var fls = flashChecker();
+
+    $(function () {
+        if (fls.f)  {
+
+            if(!/^http(s*):\/\//.test(location.href)){
+                $('<p class="bg-warning">需要服务端运行, 请部署到localhost上查看该演示</p>').insertAfter($(".uploader"));
+                return;
+            }
+            var w1 = new WebUploaderSupport({
+                server: "/webuploader-support/webUploader/save?path=webUploader",
+                paste: document.body
+                ,runtimeOrder: "flash"  //强制使用flash
+                ,sendAsBinary: true  //二进制的流的方式发送文件
+                ,swf: '../webuploader/Uploader.swf'  // swf文件所处路径
+            });
+            $(".uploader").show();
+
+        } else {
+            $('<p class="bg-warning">不支持flash,无法运行demo</p>').insertAfter($(".uploader"));
+        }
+    });
+
+
+
+
+
+
+
+</script>
+</body>
+</html>
