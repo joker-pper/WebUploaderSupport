@@ -24,12 +24,12 @@ WebUploaderSupport功能包括：
 #
 6.通过beforeFileQueued事件加入文件个数限制
 #
-7.默认不压缩图片上传
+7.默认不压缩文件上传
 #
-8.options配置通过参考webuploader,可以进行其他功能配置
+8.支持多实例，使用对应html模板，设置参数便可以进行使用
 #
-9.支持多实例，使用对应html模板，设置参数便可以进行使用
-####
+9.options配置通过参考webuploader,可以进行其他功能配置
+
 其他说明：
 #
 当前配置下html5模式默认支持拖拽.
