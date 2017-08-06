@@ -23,7 +23,7 @@
 <div class="container">
     <div class="uploader uploader1">
         <div class="message">
-            不可编辑,仅预览
+            不可编辑,仅预览，可通过 w1.editChange(true) 进行编辑
         </div>
         <div class="wrapper">
             <div class="file-list"></div>
@@ -44,12 +44,15 @@
 <script src="js/webuploader.support.js"></script>
 
 <script>
+
     var w1 = new WebUploaderSupport({
         server: "/webuploader-support/webUploader/save?path=webUploader",
         paste: document.body
+        ,swf: '../webuploader/Uploader.swf'  // swf文件所处路径
         ,support:  {
             uploader: ".uploader.uploader1",  //上传区域容器选择器
             edit: false,
+            fileSize: 6,  //文件总个数, -1时无限制
             serverFiles: [
                 {"src":"../images/preview/1.jpg","name":"1.jpg","attrs":{"data-server-file":true,"data-delete-url":""}}
                 ,{"src":"../images/preview/2.jpg","name":"2.jpg","attrs":{"data-server-file":true,"data-delete-url":""}}
@@ -57,8 +60,6 @@
             ]
         }
     });
-
-
 
 </script>
 </body>

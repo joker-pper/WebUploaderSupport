@@ -96,6 +96,7 @@
     var w1 = new WebUploaderSupport({
         server: "/webuploader-support/webUploader/save?path=webUploader",
         paste: document.body
+        ,swf: '../webuploader/Uploader.swf'  // swf文件所处路径
         ,support:  {
             uploader: ".uploader.uploader1",  //上传区域容器选择器
             fileSize: 6,  //文件总个数, -1时无限制
@@ -107,6 +108,7 @@
 
     var w2 = new WebUploaderSupport({
          server: "/webuploader-support/webUploader/save?path=webUploader"
+        ,swf: '../webuploader/Uploader.swf'  // swf文件所处路径
         ,support: {
             fileSize: 1,
             multiple: false,  //单选
@@ -116,6 +118,7 @@
 
     var w3 = new WebUploaderSupport({
         server: "/webuploader-support/webUploader/save?path=webUploader"
+        ,swf: '../webuploader/Uploader.swf'  // swf文件所处路径
         ,support: {
 			thumbnailWidth: 180,
             thumbnailHeight: 180,
@@ -126,6 +129,7 @@
     //不限制文件类型
     var w4 = new WebUploaderSupport({
         server: "/webuploader-support/webUploader/save?path=webUploader"
+        ,swf: '../webuploader/Uploader.swf'  // swf文件所处路径
         ,accept: {
             title: 'all',
             extensions: '*',
