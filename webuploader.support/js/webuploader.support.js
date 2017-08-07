@@ -40,7 +40,7 @@ function WebUploaderSupport(options) {
         },
         getFiles: function () {
             var result = null;
-            var uploader = that.uploader;
+            var uploader = this.getUploader();
             if(uploader) {
                 result = uploader.getFiles();
             }
@@ -48,7 +48,7 @@ function WebUploaderSupport(options) {
         },
         getFileSize: function (status) {
             var result = 0;
-            var uploader = that.uploader;
+            var uploader = this.getUploader();
             if(uploader) {
                 if(status != null) {
                     result = uploader.getFiles(status).length;
@@ -62,9 +62,31 @@ function WebUploaderSupport(options) {
         getInitedFileSize: function () { //获取inited状态的文件个数
             return this.getFileSize('inited');
         },
-        retryFile: function (file) {
+        retry: function (file) {
             var uploader = this.getUploader();
-            uploader && uploader.retry(file);
+            if(uploader) {
+                if(that.edit) {
+                    if(file != null) {
+                        uploader.retry(file);
+                    } else {
+                        uploader.retry();
+                    }
+                } else {
+                    this.log("can't retry, because not in edit mode");
+                }
+            }
+            this.logInfo();
+        },
+        upload: function () {
+            var uploader = this.getUploader();
+            if(uploader) {
+                if(that.edit) {
+                    uploader.upload();
+                } else {
+                    this.log("can't upload, because not in edit mode");
+                }
+            }
+            this.logInfo();
         },
         removeFileWithItem: function (file) {
             var uploader = that.uploader;
@@ -213,7 +235,7 @@ function WebUploaderSupport(options) {
         },
         retryFile: function ($item, file) {
             var $fns = this.$fns;
-            $fns.retryFile(file);
+            $fns.retry(file);
         },
         fileQueued: function (uploader, file, $fileList, $uploadFileBtn, $chooseFileBtn, removeFileWithItem) {  //文件被添加进队列
             var that = this;
@@ -479,9 +501,8 @@ function WebUploaderSupport(options) {
                     that.deleteFile($item, null, that.deleteServerFileCallback);
                 });
             }
-            setTimeout(function () {
-                that.loadChooseFileBtnStyle($chooseFileBtn, $uploadFileBtn);
-            }, 200);
+
+            that.loadChooseFileBtnStyle($chooseFileBtn, $uploadFileBtn);
         },
         editChange: function (edit) {  //用于根据edit改变时进行设置webuploader模式
             var that = this;
@@ -512,8 +533,13 @@ function WebUploaderSupport(options) {
             var fileSize = that.fileSize;
             var $actions = $chooseFileBtn.parents(".actions");
             var $label = that.getChooseFileLabel($chooseFileBtn);
+
             if (that.edit) {  //可编辑时
                 $actions.show();
+                var uploader = $fns.getUploader();
+                if(uploader) {
+                    uploader.refresh();  //解决label按钮点击无反应
+                }
                 if (fileSize > 0) {
                     var currentSize = that.getCurrentFileSize();
                     if (fileSize === currentSize) {
@@ -621,7 +647,7 @@ function WebUploaderSupport(options) {
 
             if($uploadFileBtn && $uploadFileBtn[0]) {
                 $uploadFileBtn.click(function () {
-                    uploader.upload();
+                    $fns.upload();
                 });
             }
 
@@ -674,11 +700,7 @@ function WebUploaderSupport(options) {
 
 //上传该uploader实例的文件
 WebUploaderSupport.prototype.upload = function () {
-    var uploader = this.uploader;
-    if(uploader) {
-        uploader.upload();
-    }
-    this.$fns.logInfo();
+    this.$fns.upload();
 }
 //判断是否正在上传中
 WebUploaderSupport.prototype.isInProgress = function () {
@@ -693,11 +715,7 @@ WebUploaderSupport.prototype.isInProgress = function () {
 
 
 WebUploaderSupport.prototype.retry = function () {
-    var uploader = this.uploader;
-    if(uploader) {
-        uploader.retry();
-    }
-    this.$fns.logInfo();
+    this.$fns.retry();
 }
 
 WebUploaderSupport.prototype.getSupports = function () {
@@ -705,11 +723,11 @@ WebUploaderSupport.prototype.getSupports = function () {
     return supports;
 }
 //更换模式
-WebUploaderSupport.prototype.editChange = function (val) {
-    if(typeof val != "boolean") {
-        throw new Error("the val type must be boolean");
+WebUploaderSupport.prototype.editChange = function (edit) {
+    if(typeof edit != "boolean") {
+        throw new Error("the param type must be boolean");
     }
     var supports = this.supports;
-    this.edit = val;
-    supports.editChange(val);
+    this.edit = edit;
+    supports.editChange(edit);
 }

@@ -24,13 +24,13 @@ WebUploaderSupport功能包括：
 
 5.可重写配置中support的已有的属性及方法（除了$elements与$fns）,进行更改相应的业务逻辑
 
-6.通过beforeFileQueued事件加入文件个数限制
+6.通过beforeFileQueued事件加入文件个数限制,加入是否为编辑模式,非编辑模式隐藏操作按钮,仅用于展示
 
-7.默认不压缩文件上传
+7.默认文件不压缩上传,默认只接受图片类型上传
 
 8.支持多实例，使用对应html模板，设置参数便可以进行使用
 
-9.options配置基于webuploader,可以进行其他功能配置
+9.options配置基于webuploader,可以进行其他功能项配置
 ````
 其他说明：
 ````
@@ -43,4 +43,11 @@ flash模式不支持拖拽不支持粘贴功能.
 ie不支持粘贴功能.
 
 swf参数请配置正确的路径.
+````
+函数：
+````
+upload()  上传当前实例的文件
+retry()  重试上传当前实例的文件
+isInProgress() return boolean  返回当前实例是否正在上传中
+editChange(edit)   param edit:boolean 当前实例处于哪种模式(编辑or非编辑)
 ````
