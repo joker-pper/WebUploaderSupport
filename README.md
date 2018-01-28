@@ -51,3 +51,33 @@ retry()  重试上传当前实例的文件
 isInProgress() return boolean  返回当前实例是否正在上传中
 editChange(edit)   param edit:boolean 当前实例处于哪种模式(编辑or非编辑)
 ````
+
+当前默认配置
+
+上传成功服务端应返回json: 
+{
+    "status": boolean, //是否上传成功
+    "attrs": {
+        "data-server-file": true,  //服务端文件
+        "data-delete-url": string,  //删除该服务端文件的url
+    } 
+}
+
+删除文件返回json: (重写deleteServerFileCallback可进行修改提示效果） 
+{
+    "status": boolean, //是否上传成功
+    "content": string //失败时的提示
+}
+
+e.g加载服务端文件列表json: 
+[
+  {
+  "src":"../images/preview/1.jpg",
+  "name":"1.jpg",
+  "attrs":{
+        "data-server-file":true,
+        "data-delete-url":""
+    }  //存在的属性将作为item的属性值
+  }
+]
+

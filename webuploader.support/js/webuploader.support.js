@@ -284,13 +284,13 @@ function WebUploaderSupport(options) {
             this.loadChooseFileBtnStyle($chooseFileBtn, $uploadFileBtn);
             this.loadUploadFileBtnStyle();
         },
-        uploadSuccess: function (file, data, callback, $chooseFileBtn, $uploadFileBtn) {   // 文件上传完成后
+        uploadSuccess: function (file, data, uploadSuccessCallbck, $chooseFileBtn, $uploadFileBtn) {   // 文件上传完成后
             var $item = this.getItem(file),
                 $state = $item.find('.state');
             $item.find('.progress').hide();
             if (data.status) {  //上传成功时
-                if(callback && typeof callback === "function") {
-                    callback($item, data);  //用于标识为服务端文件
+                if(uploadSuccessCallbck && typeof uploadSuccessCallbck === "function") {
+                    uploadSuccessCallbck($item, data);  //用于标识为服务端文件
                 }
                 if (!$state.hasClass('success')) {
                     $state.attr("class", "state success");
@@ -323,7 +323,7 @@ function WebUploaderSupport(options) {
          * @param removeFileWithItem  --- 用于移除文件及其显示的内容
          * @returns {boolean} 为true时可以添加到webuploader中并进行显示
          */
-        beforeFileQueued: function(uploader, file, files, fileSize, removeFileWithItem, $chooseFileBtn, $uploadFileBtn, callback) {
+        beforeFileQueued: function(uploader, file, files, fileSize, removeFileWithItem, $chooseFileBtn, $uploadFileBtn, beforeFileQueuedCallback) {
             if(fileSize < 1) {  //无限制个数
                 return true;
             }
@@ -337,8 +337,8 @@ function WebUploaderSupport(options) {
                 }
             }
 
-            if(callback && typeof callback === "function") {  //执行beforeFileQueuedCallback回调函数
-                callback(that, flag, edit, uploader, file, fileSize, currentFileSize);
+            if(beforeFileQueuedCallback && typeof beforeFileQueuedCallback === "function") {  //执行beforeFileQueuedCallback回调函数
+                beforeFileQueuedCallback(that, flag, edit, uploader, file, fileSize, currentFileSize);
             }
 
             return flag;
@@ -382,13 +382,23 @@ function WebUploaderSupport(options) {
             }
             return size;
         },
-
+        getItemSize: function () {  //获取当前item的文件个数
+            var $fileList = this.$elements.$fileList;
+            var size = 0;
+            if($fileList) {
+                size = $fileList.find(".file-item").size();
+            }
+            return size;
+        },
         getCurrentFileSize: function () {  //获取当前uploader实例中文件的个数
             var fileStatus = WebUploaderSupport.fileStatus;
             var $fns = this.$fns;
             var initedSize = $fns.getFileSize(fileStatus.inited);  //初始状态个数
             var errorSize = $fns.getFileSize(fileStatus.error);  //上传失败个数
-            return initedSize + errorSize + this.getServerFileSize();  //最终加上服务端文件个数
+            var size = initedSize + errorSize + this.getServerFileSize();//最终加上服务端文件个数
+            var itemSize = this.getItemSize();
+            var result = itemSize > size ? itemSize : size;
+            return result;
         },
         removeFileItem: function($item) {  //移除$item
             if($item && $item[0]) {
@@ -406,14 +416,12 @@ function WebUploaderSupport(options) {
                 if(removeFileWithItem && file) {
                     removeFileWithItem(file);
                 }
-
                 var $chooseFileBtn = this.$elements.$chooseFileBtn, $uploadFileBtn = this.$elements.$uploadFileBtn;
                 this.loadChooseFileBtnStyle($chooseFileBtn, $uploadFileBtn);
-
             }
         },
         deleteServerFileAttrName: "data-delete-url",
-        deleteServerFile: function ($item, callback) {  //删除服务器文件
+        deleteServerFile: function ($item, deleteServerFileCallback) {  //删除服务器文件
             var that = this;
             var url = $item && $item.attr(that.deleteServerFileAttrName);
             if(url) {
@@ -422,8 +430,11 @@ function WebUploaderSupport(options) {
                     type: "post",
                     url: url,
                     success: function (json) {
-                        if(callback && typeof callback === "function") {
-                            callback(that, $item, json);  //通过callback执行业务操作
+                        if(deleteServerFileCallback && typeof deleteServerFileCallback === "function") {
+                            deleteServerFileCallback(that, $item, json);  //通过callback执行业务操作
+
+                            var $chooseFileBtn = that.$elements.$chooseFileBtn, $uploadFileBtn = that.$elements.$uploadFileBtn;
+                            that.loadChooseFileBtnStyle($chooseFileBtn, $uploadFileBtn);
                         }
                     }
                 });
@@ -435,9 +446,6 @@ function WebUploaderSupport(options) {
             } else {
                 alert(data.content);
             }
-
-            var $chooseFileBtn = that.$elements.$chooseFileBtn, $uploadFileBtn = that.$elements.$uploadFileBtn;
-            that.loadChooseFileBtnStyle($chooseFileBtn, $uploadFileBtn);
         },
         serverFiles: [],  //加载服务端的数据,当前为 [{name:string, src: string, attrs: {}}]
         init: function (data, $fileList, $chooseFileBtn, $uploadFileBtn) { //初始化服务端数据,及加载样式
