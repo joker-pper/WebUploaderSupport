@@ -191,23 +191,24 @@
     top: 50%;
 }
 
-
-.actions {
-    margin-top: 20px;
+.actions-area {
+    height: 55px;
     position: relative;
-    float: right;
-    width: 195px;
 }
 
+.actions {
+    position: absolute;
+    top: 15px;
+    right: 0px;
+}
 
 .actions .action {
     display: inline-block;
-
+    float: left;
+    height: 40px;
 }
 
 .upload-btn {
-    position: relative;
-    margin-top: -33px;
     outline: none !important;
     cursor: pointer;
     border: 0;
@@ -232,18 +233,6 @@
 .upload-btn.disabled:hover {
     background: #404040!important;
 }
-
-
-.upload-btn.right {
-    right: -93px;
-    margin-top: 0px;
-    margin-right: 1px;
-    margin-bottom: 3px;
-}
-.upload-btn:hover {
-    color: #565656;
-}
-
 
 /*上传时使某些内容不显示*/
 .uploading {

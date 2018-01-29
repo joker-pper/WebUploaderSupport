@@ -54,7 +54,9 @@ editChange(edit)   param edit:boolean 当前实例处于哪种模式(编辑or非
 
 当前默认配置
 
+````
 上传成功服务端应返回json: 
+
 {
     "status": boolean, //是否上传成功
     "attrs": {
@@ -63,13 +65,18 @@ editChange(edit)   param edit:boolean 当前实例处于哪种模式(编辑or非
     } 
 }
 
+````
+
 删除文件返回json: (重写deleteServerFileCallback可进行修改提示效果） 
 {
     "status": boolean, //是否上传成功
     "content": string //失败时的提示
 }
 
-e.g加载服务端文件列表json: 
+
+````
+加载服务端文件列表json: 
+
 [
   {
   "src":"../images/preview/1.jpg",
@@ -80,4 +87,4 @@ e.g加载服务端文件列表json:
     }  //存在的属性将作为item的属性值
   }
 ]
-
+````
