@@ -210,15 +210,30 @@
     margin-top: -33px;
     outline: none !important;
     cursor: pointer;
-    background: #fff;
-    color: #565656;
-    width: 90px;
-    height: 40px;
+    border: 0;
+    padding: 10px 15px;
+    background: #76d67d!important;
+    color: #fff!important;
     text-align: center;
-    border-radius: 4px;
+    border-radius: 3px;
     overflow: hidden;
     margin-left: 14px;
 }
+
+.upload-btn:hover {
+    background: #4bb953 !important;
+}
+
+
+.upload-btn.disabled {
+    background: #848080!important;
+}
+
+.upload-btn.disabled:hover {
+    background: #404040!important;
+}
+
+
 .upload-btn.right {
     right: -93px;
     margin-top: 0px;
