@@ -72,6 +72,7 @@
 }
 
 
+
 .file-list .file-item .file-retry {
     display: none;
     position: absolute;
@@ -87,6 +88,34 @@
 /*重试时显示重试按钮*/
 .file-list .file-item.retry:hover .file-retry {
     display: block;
+}
+
+/*删除重试按钮样式*/
+.file-list .file-item button {
+    outline: none !important;
+    border: 0;
+    padding: 5px 12px;
+    opacity: 0.9;
+    color: #fff!important;
+    text-align: center;
+    border-radius: 3px;
+}
+
+/*删除按钮*/
+.file-list .file-item .file-delete button {
+    background: #f14641;
+}
+
+.file-list .file-item .file-delete button:hover {
+    background: #f1281a;
+}
+
+.file-list .file-item .file-retry button {
+    background: #daa7ff;
+}
+
+.file-list .file-item .file-retry button:hover {
+    background: #bf8cff;
 }
 
 /*重试时进度条隐藏*/

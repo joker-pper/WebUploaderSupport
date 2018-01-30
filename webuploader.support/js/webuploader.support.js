@@ -479,9 +479,11 @@ function WebUploaderSupport(options) {
             var $fns = that.$fns;
             var fileSize = that.fileSize;
             var $actions = $chooseFileBtn.parents(".actions");
+            var $actionsArea = $actions.parent(".actions-area");
             var $label = that.getChooseFileLabel($chooseFileBtn);
 
             if (that.edit) {  //可编辑时
+                $actionsArea.css("height", "");
                 $actions.show();
                 var uploader = $fns.getUploader();
                 if(uploader) {
@@ -504,7 +506,10 @@ function WebUploaderSupport(options) {
                     $uploadFileBtn.removeClass("right");
                 }
             } else {  //不可编辑时
+
                 $actions.hide();
+                $actionsArea.css("height", 10);
+
                 if ($label) {
                     $label.hide();
                 }
