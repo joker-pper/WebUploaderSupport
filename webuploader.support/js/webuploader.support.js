@@ -97,63 +97,6 @@ function WebUploaderSupport(options) {
                 }
             }
 
-        },
-        getBrowser: function() {
-            var ua = navigator.userAgent.toLowerCase();
-            var btypeInfo = (ua.match(/firefox|chrome|safari|opera/g) || "other")[0];
-            if ((ua.match(/msie|trident/g) || [])[0]) {
-                btypeInfo = "msie";
-            }
-            var pc = "";
-            var prefix = "";
-            var plat = "";
-            //如果没有触摸事件 判定为PC
-            var isTocuh = ("ontouchstart" in window) || (ua.indexOf("touch") !== -1) || (ua.indexOf("mobile") !== -1);
-            if (isTocuh) {
-                if (ua.indexOf("ipad") !== -1) {
-                    pc = "pad";
-                } else if (ua.indexOf("mobile") !== -1) {
-                    pc = "mobile";
-                } else if (ua.indexOf("android") !== -1) {
-                    pc = "androidPad";
-                } else {
-                    pc = "pc";
-                }
-            } else {
-                pc = "pc";
-            }
-            switch (btypeInfo) {
-                case "chrome":
-                case "safari":
-                case "mobile":
-                    prefix = "webkit";
-                    break;
-                case "msie":
-                    prefix = "ms";
-                    break;
-                case "firefox":
-                    prefix = "Moz";
-                    break;
-                case "opera":
-                    prefix = "O";
-                    break;
-                default:
-                    prefix = "webkit";
-                    break
-            }
-            plat = (ua.indexOf("android") > 0) ? "android": navigator.platform.toLowerCase();
-            return {
-                version: (ua.match(/[\s\S]+(?:rv|it|ra|ie)[\/: ]([\d.]+)/) || [])[1],
-                //版本
-                plat: plat,
-                //系统
-                type: btypeInfo,
-                //浏览器
-                pc: pc,
-                prefix: prefix,
-                //前缀
-                isMobile: (pc == "pc") ? false: true //是否是移动端
-            }
         }
     };
     that.$fns = $fns;
@@ -170,18 +113,14 @@ function WebUploaderSupport(options) {
         chooseFileBtn: ".filePicker",  //选择文件的按钮选择器
         uploadFileBtn: ".uploadFile",  //上传文件的按钮选择器
         fileList: ".file-list",  //显示文件列表的区域选择器
+        fileListHeight: 150,  //初始默认高度
         log: false,    //是否打印信息
         multiple: true,  //默认多选
         thumbnailWidth: 150,
         thumbnailHeight: 150,
         fileSize: -1,  //文件总个数, -1时无限制
         ratio: (function () {
-            var result = that.$fns.getBrowser();
-            if(result.isMobile) {
-                return 1;
-            } else {
-                return window.devicePixelRatio || 1;  //优化retina, 在retina下这个值是2
-            }
+            return window.devicePixelRatio || 1;  //优化retina, 在retina下这个值是2
         })(),
         getActualThumbnailWidth: function () {
             var that = this;
@@ -197,13 +136,13 @@ function WebUploaderSupport(options) {
             var that = this;
             // 缩略图大小
             var thumbnailWidth = that.getActualThumbnailWidth(), thumbnailHeight = that.getActualThumbnailHeight();
-            that.setItemStyle($item);  //以缩略图大小设置item宽高
+            that.setItemStyle($item);  //设置item宽高
 
             uploader.makeThumb(file, function (error, src) {
                 if (error) {
                     var $replace = $('<div class="preview"></div>').css({
-                        height: thumbnailHeight,
-                        width: thumbnailWidth
+                        height: that.thumbnailHeight,
+                        width: that.thumbnailWidth
                     }).append($('<div class="preview-tips">不能预览</div>'));
                     $img.replaceWith($replace);
                     return;
@@ -217,8 +156,8 @@ function WebUploaderSupport(options) {
         setItemStyle: function ($item) {  //设置缩略图所在容器的宽高,默认是均150px,用于加载文件预览时设置
             if($item) {
                 var that = this;
-                var thumbnailWidth = that.getActualThumbnailWidth(), thumbnailHeight = that.getActualThumbnailHeight();
-                $item.css({width: thumbnailWidth, height: thumbnailHeight});  //以缩略图大小设置$item宽高
+                var thumbnailWidth = that.thumbnailWidth, thumbnailHeight = that.thumbnailHeight;
+                $item.css({width: thumbnailWidth, height: thumbnailHeight});  //设置$item宽高
             }
         },
         loadUploadFileBtnStyle: function () {  //用于加载上传按钮的样式
@@ -454,7 +393,7 @@ function WebUploaderSupport(options) {
             var edit = that.edit;
             var $files = null;
 
-            var thumbnailHeight = that.getActualThumbnailHeight();
+            var thumbnailHeight = that.thumbnailHeight;
             $fileList.css({"min-height": thumbnailHeight + 20});  //设置该区域最小高度为thumbnailHeight + 20px
 
             //加载服务端数据
@@ -474,7 +413,7 @@ function WebUploaderSupport(options) {
                     if(item.name != null && /(.jpg|.png|.gif|.bmp|.jpeg)$/.test(item.name.toLocaleLowerCase())) {
                         $preview = $('<img src="'+ item.src + '"/>');
                     } else {
-                        var thumbnailWidth = that.getActualThumbnailWidth(), thumbnailHeight = that.getActualThumbnailHeight();
+                        var thumbnailWidth = that.thumbnailWidth, thumbnailHeight = that.thumbnailHeight;
                         $preview = $('<div class="preview"></div>').css({
                             height: thumbnailHeight,
                             width: thumbnailWidth
@@ -628,8 +567,10 @@ function WebUploaderSupport(options) {
     that.edit = support.edit;
     that.support = WebUploader.Uploader.support(); //获取是否支持webuploader上传
 
+
     jQuery(function() {
         var $ = jQuery;
+        $fileList.css({"min-height": support.fileListHeight + 20});
 
         var uploader;
         try {
