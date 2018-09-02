@@ -10,6 +10,7 @@ https://joker-pper.github.io/WebUploaderSupport/webuploader.support/show.html
 <br />
 https://joker-pper.github.io/WebUploaderSupport/webuploader.support/flash.html
 <br />
+https://joker-pper.github.io/WebUploaderSupport/webuploader.support/simple.html
 <br />
 WebUploaderSupport功能包括：
 
@@ -31,6 +32,8 @@ WebUploaderSupport功能包括：
 8.支持多实例，使用对应html模板，设置参数便可以进行使用
 
 9.options配置基于webuploader,可以进行其他功能项配置
+
+10.样式不依赖于其他前端ui框架
 ````
 其他说明：
 ````
@@ -65,13 +68,16 @@ editChange(edit)   param edit:boolean 当前实例处于哪种模式(编辑or非
     } 
 }
 
+
 ````
 
-删除文件返回json: (重写deleteServerFileCallback可进行修改提示效果） 
+````
+删除文件返回json: (重写deleteServerFileCallback可进行修改提示效果）
 {
     "status": boolean, //是否上传成功
     "content": string //失败时的提示
 }
+````
 
 
 ````

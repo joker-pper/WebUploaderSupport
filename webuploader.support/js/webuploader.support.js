@@ -133,6 +133,24 @@ function WebUploaderSupport(options) {
             var ratio = that.ratio;
             return that.thumbnailHeight * ratio;
         },
+        /**
+         * 获取不能预览的文件的样式,可覆盖(可根据名称解析后返回img对象显示)
+         * @param name 文件名
+         * @param thumbnailHeight
+         * @param thumbnailWidth
+         * @returns {jQuery}
+         */
+        getThumbErrorPreview: function (name, thumbnailHeight, thumbnailWidth) {
+            var $element = $('<div class="preview"></div>').css({
+                height: thumbnailHeight,
+                width: thumbnailWidth
+            }).append($('<div class="preview-tips">不能预览</div>'));
+            return $element;
+
+            //显示图片的方式
+            //return $('<img src="../images/preview/1.jpg">');
+
+        },
         showPreview: function ($item, file) {   //显示文件中的预览效果
             var $preview = $('<img />');
             $item.append($preview);
@@ -143,11 +161,7 @@ function WebUploaderSupport(options) {
             var self = this;
             uploader.makeThumb(file, function (error, src) {
                 if (error) {
-                    var $replace = $('<div class="preview"></div>').css({
-                        height: self.thumbnailHeight,
-                        width: self.thumbnailWidth
-                    }).append($('<div class="preview-tips">不能预览</div>'));
-                    $preview.replaceWith($replace);
+                    $preview.replaceWith(self.getThumbErrorPreview(file.name, self.thumbnailHeight, self.thumbnailWidth));
                     return;
                 }
                 $preview.attr('src', src);
@@ -186,8 +200,8 @@ function WebUploaderSupport(options) {
                 '<div class="file-item thumbnail">' +
                     '<div class="file-info">' + name + '</div>' +
                     '<div class="file-operations">' +
-                        '<div class="file-delete">' + '<button type="button" class="btn">' + '删除</button></div>' +
-                        '<div class="file-retry">' + '<button type="button" class="btn">' + '重试</button></div>' +
+                        '<div class="file-delete">' + '<button type="button">' + '删除</button></div>' +
+                        '<div class="file-retry">' + '<button type="button">' + '重试</button></div>' +
                     '</div>' +
                     '<div class="progress">' +
                         '<div class="progress-bar"></div>' +
@@ -201,11 +215,7 @@ function WebUploaderSupport(options) {
                 if(/(.jpg|.png|.gif|.bmp|.jpeg)$/.test(name.toLocaleLowerCase())) {
                     $preview = $('<img src="'+ data.src + '"/>');
                 } else {
-                    var thumbnailWidth = this.thumbnailWidth, thumbnailHeight = this.thumbnailHeight;
-                    $preview = $('<div class="preview"></div>').css({
-                        height: thumbnailHeight,
-                        width: thumbnailWidth
-                    }).append($('<div class="preview-tips">不能预览</div>'));
+                    $preview = this.getThumbErrorPreview(data.name, this.thumbnailHeight, this.thumbnailWidth);
                 }
                 $item.append($preview);
             } else {
@@ -221,7 +231,7 @@ function WebUploaderSupport(options) {
             var $fileList = this.$elements.$fileList;
             $fileList.append($item);  //显示在文件列表中
             self.loadUploadFileBtnStyle();  //加载上传按钮样式
-            $item.on("click", '.btn', function () {
+            $item.on("click", 'button', function () {
                 var $this = $(this);
                 if($this.parents(".file-retry")[0]) {
                     self.retryFile($item, file);
@@ -476,7 +486,7 @@ function WebUploaderSupport(options) {
             }
             if($files) { //加载服务端数据
                 $fileList.append($files);
-                $files.on('click', '.file-delete .btn', function () {
+                $files.on('click', '.file-delete button', function () {
                     var $item = $(this).parents(".file-item");
                     that.deleteFile($item, null, that.deleteServerFileCallback);
                 });

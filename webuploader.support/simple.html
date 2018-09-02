@@ -4,10 +4,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Bootstrap uploader show demo</title>
-
-    <!-- Bootstrap -->
-    <link href="../bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <title>show demo</title>
 
     <link rel="stylesheet" type="text/css" href="../webuploader/webuploader.css">
     <link rel="stylesheet" type="text/css" href="css/style.css">
@@ -23,7 +20,7 @@
 <div class="container">
     <div class="uploader uploader1">
         <div class="message">
-            不可编辑,仅预览，可通过 w1.editChange(true) 进行编辑
+            用于展示样式较通用不依赖前端ui框架
         </div>
         <div class="wrapper">
             <div class="file-list"></div>
@@ -34,15 +31,11 @@
                 <button class="uploadFile action upload-btn disabled">上传图片</button>
             </div>
         </div>
-
     </div>
 
 </div>
 
-<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
 <script src="../jquery.min.js"></script>
-<!-- Include all compiled plugins (below), or include individual files as needed -->
-<script src="../bootstrap/js/bootstrap.min.js"></script>
 <script src="../webuploader/webuploader.js"></script>
 <script src="js/webuploader.support.js"></script>
 
@@ -52,10 +45,16 @@
         server: "/webuploader-support/webUploader/save?path=webUploader",
         paste: document.body
         ,swf: '../webuploader/Uploader.swf'  // swf文件所处路径
+        ,accept: {
+            title: 'all',
+            extensions: '*',
+            mimeTypes: '*'
+        }
         ,support:  {
             uploader: ".uploader.uploader1",  //上传区域容器选择器
-            edit: false,
+            edit: true,
             fileSize: 6,  //文件总个数, -1时无限制
+
             serverFiles: [
                 {"src":"../images/preview/1.jpg","name":"1.jpg","attrs":{"data-server-file":true,"data-delete-url":""}}
                 ,{"src":"../images/preview/2.jpg","name":"2.jpg","attrs":{"data-server-file":true,"data-delete-url":""}}
