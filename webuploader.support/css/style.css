@@ -59,7 +59,8 @@
     height: 100%;
 }
 
-.file-list .file-item .file-delete {
+
+.file-list .file-item .file-delete, .file-list .file-item .file-retry {
     display: none;
     position: absolute;
     width: 100px;
@@ -72,18 +73,6 @@
 }
 
 
-
-.file-list .file-item .file-retry {
-    display: none;
-    position: absolute;
-    width: 100px;
-    height: 30px;
-    left: 50%;
-    margin-left: -50px;
-    margin-top: -15px;
-    top: 50%;
-    z-index: 1;
-}
 
 /*重试时显示重试按钮*/
 .file-list .file-item.retry:hover .file-retry {
@@ -268,3 +257,16 @@
 	 z-index: -1!important;
 }
 
+.file-list .file-item.retry .file-delete  {
+    display: block;
+    margin-top: 0;
+}
+
+.file-list .file-item.retry button {
+    padding: 2px 5px;
+}
+
+.file-list .file-item.retry .file-retry  {
+    display: block;
+    margin-top: -30px;
+}
