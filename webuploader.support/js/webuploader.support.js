@@ -246,10 +246,10 @@ function WebUploaderSupport(options) {
         },
         uploadProgress: function (file, percentage) {  //文件上传过程中创建进度条
             var $item = this.getItem(file);
-            $item.removeClass("retry");  //移除重试class
-            var $percent = $item.find('.progress .progress-bar');
             $item.find('.file-delete, .preview-tips').addClass("uploading");  //隐藏删除按钮、提示文字
+            $item.removeClass("retry");  //移除重试class
             $item.find('.progress').show();  //显示进度条
+            var $percent = $item.find('.progress .progress-bar');
             $percent.css('width', percentage * 100 + '%');
         },
         uploadComplete: function (file) {  //完成上传时，无论成功或者失败
@@ -259,7 +259,6 @@ function WebUploaderSupport(options) {
 
             var $uploadFileBtn = this.$elements.$uploadFileBtn;
             var $chooseFileBtn = this.$elements.$chooseFileBtn;
-
 
             this.loadChooseFileBtnStyle($chooseFileBtn, $uploadFileBtn);
             this.loadUploadFileBtnStyle();
@@ -418,9 +417,9 @@ function WebUploaderSupport(options) {
          * @param deleteServerFileCallback
          */
         deleteServerFile: function ($item, deleteServerFileCallback) {
-            var that = this;
+            var self = this;
             //获取删除的url
-            var url = $item && $item.attr(that.deleteServerFileAttrName);
+            var url = $item && $item.attr(self.deleteServerFileAttrName);
             if(url) {
                 $.ajax({
                     dataType: "json",
@@ -428,23 +427,23 @@ function WebUploaderSupport(options) {
                     url: url,
                     success: function (json) {
                         if(deleteServerFileCallback && typeof deleteServerFileCallback === "function") {
-                            deleteServerFileCallback(that, $item, json);  //通过callback执行业务操作
-                            var $chooseFileBtn = that.$elements.$chooseFileBtn, $uploadFileBtn = that.$elements.$uploadFileBtn;
-                            that.loadChooseFileBtnStyle($chooseFileBtn, $uploadFileBtn);
+                            deleteServerFileCallback(self, $item, json);  //通过callback执行业务操作
+                            var $chooseFileBtn = self.$elements.$chooseFileBtn, $uploadFileBtn = self.$elements.$uploadFileBtn;
+                            self.loadChooseFileBtnStyle($chooseFileBtn, $uploadFileBtn);
                         }
                     }
                 });
             }
         },
         /**
-         * deleteServerFile 响应成功时的回调处理,that指当前对象,可根据实际覆盖重写
-         * @param that
+         * deleteServerFile 响应成功时的回调处理,可根据实际覆盖重写
+         * @param self 当前对象
          * @param $item
          * @param data
          */
-        deleteServerFileCallback: function (that, $item, data) {
+        deleteServerFileCallback: function (self, $item, data) {
             if(data.status) {
-                that.removeFileItem($item);
+                self.removeFileItem($item);
             } else {
                 alert(data.content);
             }
@@ -452,11 +451,11 @@ function WebUploaderSupport(options) {
         serverFiles: [],  //加载服务端的数据,当前为 [{name:string, src: string, attrs: {}}]
         init: function (data, $fileList, $chooseFileBtn, $uploadFileBtn) { //初始化服务端数据,及加载样式
 
-            var that = this;
-            var edit = that.edit;
+            var self = this;
+            var edit = self.edit;
             var $files = null;
 
-            var thumbnailHeight = that.thumbnailHeight;
+            var thumbnailHeight = self.thumbnailHeight;
             $fileList.css({"min-height": thumbnailHeight + 20});  //设置该区域最小高度为thumbnailHeight + 20px
 
             //加载服务端数据
@@ -469,7 +468,7 @@ function WebUploaderSupport(options) {
                         $item.addClass("not-edit");
                     }
 
-                    that.setItemStyle($item);  //以缩略图大小设置$item宽高
+                    self.setItemStyle($item);  //以缩略图大小设置$item宽高
 
                     if($item && item) {
                         var attrs = item.attrs;
@@ -488,11 +487,11 @@ function WebUploaderSupport(options) {
                 $fileList.append($files);
                 $files.on('click', '.file-delete button', function () {
                     var $item = $(this).parents(".file-item");
-                    that.deleteFile($item, null, that.deleteServerFileCallback);
+                    self.deleteFile($item, null, self.deleteServerFileCallback);
                 });
             }
 
-            that.loadChooseFileBtnStyle($chooseFileBtn, $uploadFileBtn);
+            self.loadChooseFileBtnStyle($chooseFileBtn, $uploadFileBtn);
         },
         editChange: function (edit) {  //用于根据edit改变时进行设置webuploader模式
             var that = this;
