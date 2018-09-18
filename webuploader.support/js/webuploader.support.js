@@ -331,7 +331,7 @@ function WebUploaderSupport(options) {
          *       Q_TYPE_DENIED 当文件类型不满足时
          *       Q_EXCEED_NUM_LIMIT 在设置了fileNumLimit且尝试给uploader添加的文件数量超出这个值时
          */
-        errorTypeHanlder: function (type) {
+        errorTypeHanlder: function (type, file) {
 
         },
         uploadError: function (file) {  //文件上传失败后
@@ -650,46 +650,46 @@ function WebUploaderSupport(options) {
 
             //文件被添加进队列时
             uploader.on('fileQueued', function (file) {
-                support.fileQueued && support.fileQueued(file);
+                support.fileQueued && support.fileQueued.apply(support, arguments);
             });
 
             //移除文件时
             uploader.on('fileDequeued', function (file) {
-                support.fileDequeued && support.fileDequeued(file);
+                support.fileDequeued && support.fileDequeued.apply(support, arguments);
             });
 
             uploader.on('uploadProgress', function (file, percentage) {
-                support.uploadProgress && support.uploadProgress(file, percentage);
+                support.uploadProgress && support.uploadProgress.apply(support, arguments);
             });
 
             //完成上传时，无论成功或者失败
             uploader.on('uploadComplete', function (file) {
-                support.uploadComplete && support.uploadComplete(file);
+                support.uploadComplete && support.uploadComplete.apply(support, arguments);
             });
 
 
             // 文件上传完成后，添加相应的样式(响应成功)
             uploader.on('uploadSuccess', function (file, data) {
-                support.uploadSuccess && support.uploadSuccess(file, data);
+                support.uploadSuccess && support.uploadSuccess.apply(support, arguments);
             });
 
             // 文件上传失败，显示上传出错（上传失败出现错误状态码时）
             uploader.on('uploadError', function (file) {
-                support.uploadError && support.uploadError(file);
+                support.uploadError && support.uploadError.apply(support, arguments);
             });
             // 当文件被加入队列之前触
             uploader.on('beforeFileQueued', function (file) {
-                return support.beforeFileQueued && support.beforeFileQueued(file);
+                return support.beforeFileQueued && support.beforeFileQueued.apply(support, arguments);
 
             });
 
             //当前uploader实例文件上传完成后触发
             uploader.on("uploadFinished", function () {
-                support.uploadFinished && support.uploadFinished();
+                support.uploadFinished && support.uploadFinished.apply(support, arguments);
             });
 
-            uploader.on('error', function (type) {
-                support.errorTypeHanlder && support.errorTypeHanlder(type);
+            uploader.on('error', function () {
+                support.errorTypeHanlder && support.errorTypeHanlder.apply(support, arguments);
             });
 
         }

@@ -119,7 +119,12 @@
         ,support: {
             fileSize: 1,
             multiple: false,  //单选
-            uploader: ".uploader.uploader2"
+            uploader: ".uploader.uploader2",
+            errorTypeHanlder: function (type, file) {
+                if (type == "Q_TYPE_DENIED") {
+                    alert(file.name + "不满足格式要求");
+                }
+            }
         }
     });
 
