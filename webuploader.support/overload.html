@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Bootstrap uploader overload demo</title>
+
+    <!-- Bootstrap -->
+    <link href="../bootstrap/css/bootstrap.min.css" rel="stylesheet">
+
+    <link rel="stylesheet" type="text/css" href="../webuploader/webuploader.css">
+    <link rel="stylesheet" type="text/css" href="css/style.css">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+    <script src="https://cdn.bootcss.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+    <script src="https://cdn.bootcss.com/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+</head>
+<body>
+<div class="container">
+
+    <div class="uploader uploader1">
+        <div class="message">
+            可以尝试文件拖拽，或者点击选择文件按钮，来体验此demo。(个数6个,并重写删除服务端逻辑[可使用提示组件进行信息提示])
+        </div>
+        <div class="wrapper">
+            <div class="file-list"></div>
+        </div>
+        <div class="actions-area">
+            <div class="actions">
+                <div class="filePicker action">选择文件</div>
+                <button class="uploadFile action upload-btn disabled">上传文件</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="uploader uploader2">
+        <div class="message">
+            可以尝试文件拖拽，或者点击选择文件按钮，来体验此demo。(个数6个,测试全覆盖)
+        </div>
+        <div class="wrapper">
+            <div class="file-list"></div>
+        </div>
+        <div class="actions-area">
+            <div class="actions">
+                <div class="filePicker action">选择文件</div>
+                <button class="uploadFile action upload-btn disabled">上传文件</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+<script src="../jquery.min.js"></script>
+<!-- Include all compiled plugins (below), or include individual files as needed -->
+<script src="../bootstrap/js/bootstrap.min.js"></script>
+<script src="../webuploader/webuploader.js"></script>
+<script src="js/webuploader.support.js"></script>
+
+<script>
+
+
+
+    var w1 = new WebUploaderSupport({
+        server: "/webuploader-support/webUploader/save?path=webUploader"
+        ,swf: '../webuploader/Uploader.swf'  // swf文件所处路径
+        ,accept: {
+            title: 'all',
+            extensions: '*',
+            mimeTypes: '*'
+        }
+        ,support: {
+            uploader: ".uploader.uploader1",
+            serverFiles: [
+                {"src":"../images/preview/1.jpg","name":"1.jpg","attrs":{"data-server-file":true,"data-delete-url":"api/delete"}}
+                ,{"src":"../images/preview/2.jpg","name":"2.jpg","attrs":{"data-server-file":true,"data-delete-url":"api/delete"}}
+            ],
+            fileSize: 6,
+            /**
+             * 删除服务端文件(依赖于getIsServerFile的判断结果)的业务操作,可根据实际覆盖重写(support配置中直接重写该函数即可)
+             * @param $item
+             * @param deleteServerFileCallback
+             */
+            deleteServerFile: function($item, url, deleteServerFileCallback) {
+                var self = this;
+                //通过callback执行业务操作,当前默认全为true
+                deleteServerFileCallback(self, $item, {status: true, content: "删除成功"});
+                //文件操作完成后重新加载选择按钮样式
+                self.loadChooseFileBtnStyle();
+            },
+            /**
+             * deleteServerFile 响应成功时的回调处理,可根据实际覆盖重写
+             * @param self 当前support对象
+             * @param $item
+             * @param data
+             */
+            deleteServerFileCallback: function (self, $item, data) {
+                if(data.status) {
+                    self.removeFileItem($item);
+                }
+                alert(data.content);
+            }
+        }
+    });
+
+
+
+
+    var w2 = new WebUploaderSupport({
+        server: "/webuploader-support/webUploader/save?path=webUploader"
+        ,swf: '../webuploader/Uploader.swf'  // swf文件所处路径
+        ,accept: {
+            title: 'all',
+            extensions: '*',
+            mimeTypes: '*'
+        }
+        ,support: {
+
+            $fns: {},  //公共函数
+            $elements: {},  //区域jquery元素
+            edit: true,
+            uploader: ".uploader",  //上传区域容器选择器
+            dndWrapper: ".wrapper",  //拖拽区域选择器
+            chooseFileBtn: ".filePicker",  //选择文件的按钮选择器
+            uploadFileBtn: ".uploadFile",  //上传文件的按钮选择器
+            fileList: ".file-list",  //显示文件列表的区域选择器
+            log: true,    //是否打印信息
+            multiple: true,  //默认多选
+            thumbnailWidth: 150,
+            thumbnailHeight: 150,
+            fileListMinHeight: 100, //默认最小高度
+            /**
+             * 获取fileListMinHeight时是否依据thumbnail的值
+             */
+            fileListMinHeightWithThumbnail: true,
+            /**
+             * 获取file list最小高度值
+             * @returns {number}
+             */
+            getFileListMinHeight: function() {
+                var self = this;
+                if (self.fileListMinHeightWithThumbnail) {
+                    return this.thumbnailHeight + 20;
+                }
+                return this.fileListMinHeight;
+            },
+            fileSize: -1,  //文件总个数, -1时无限制
+            instance: null, //uploader实例
+            ratio: (function () {
+                return window.devicePixelRatio || 1;  //优化retina, 在retina下这个值是2
+            })(),
+            getActualThumbnailWidth: function () {
+                var self = this;
+                var ratio = self.ratio;
+                return self.thumbnailWidth * ratio;
+            },
+            getActualThumbnailHeight: function () {
+                var self = this;
+                var ratio = self.ratio;
+                return self.thumbnailHeight * ratio;
+            },
+            /**
+             * 获取不能预览的文件的样式,可覆盖(可根据名称解析后返回img对象显示)
+             * @param name 文件名
+             * @param thumbnailHeight
+             * @param thumbnailWidth
+             * @returns {jQuery}
+             */
+            getThumbErrorPreview: function (name, thumbnailHeight, thumbnailWidth) {
+                var $element = $('<div class="preview"></div>').css({
+                    height: thumbnailHeight,
+                    width: thumbnailWidth
+                }).append($('<div class="preview-tips">不能预览</div>'));
+                return $element;
+
+                //显示图片的方式
+                //return $('<img src="../images/preview/1.jpg">');
+
+            },
+            showPreview: function ($item, file) {   //显示文件中的预览效果
+                var $preview = $('<img />');
+                $item.append($preview);
+                var uploader = this.instance;
+                // 缩略图大小
+                var thumbnailWidth = this.getActualThumbnailWidth(), thumbnailHeight = this.getActualThumbnailHeight();
+                this.setItemStyle($item);  //设置item宽高
+                var self = this;
+                uploader.makeThumb(file, function (error, src) {
+                    if (error) {
+                        $preview.replaceWith(self.getThumbErrorPreview(file.name, self.thumbnailHeight, self.thumbnailWidth));
+                        return;
+                    }
+                    $preview.attr('src', src);
+
+                }, thumbnailWidth, thumbnailHeight);
+            },
+            getItem: function (file) {  //获取$item
+                return $("#" + file.id);
+            },
+            setItemStyle: function ($item) {  //设置缩略图所在容器的宽高,默认是均150px,用于加载文件预览时设置
+                if($item) {
+                    var self = this;
+                    var thumbnailWidth = self.thumbnailWidth, thumbnailHeight = self.thumbnailHeight;
+                    $item.css({width: thumbnailWidth, height: thumbnailHeight});  //设置$item宽高
+                }
+            },
+            loadUploadFileBtnStyle: function () {  //用于加载上传按钮的样式
+                var $fns = this.$fns;
+                var $uploadFileBtn = this.$elements.$uploadFileBtn;
+                if($fns && $uploadFileBtn) {
+                    var initedSize = $fns.getInitedFileSize();
+                    if (initedSize === 0) {  //inited 文件个数
+                        $uploadFileBtn.addClass("disabled"); //上传按钮禁用
+                    } else {
+                        $uploadFileBtn.removeClass("disabled");  //移除上传按钮的禁用样式
+                    }
+                }
+            },
+            retryFile: function ($item, file) {
+                var $fns = this.$fns;
+                $fns.retry(file);
+            },
+            //移除$item
+            removeFileItem: function($item) {
+                if($item && $item[0]) {
+                    $item.off().remove();
+                }
+            },
+            //移除$item和file
+            removeFileWithItem: function (file) {
+                var $fns = this.$fns;
+                $fns.removeFileWithItem(file);
+            },
+            /**
+             *
+             * @param isFile 是否为file对象
+             * @param data
+             * @returns {*}
+             */
+            renderItem: function (isFile, data) {
+                var name = data.name || "";
+                var html =
+                    '<div class="file-item thumbnail">' +
+                    '<div class="file-info">' + name + '</div>' +
+                    '<div class="file-operations">' +
+                    '<div class="file-delete">' + '<button type="button">' + '删除</button></div>' +
+                    '<div class="file-retry">' + '<button type="button">' + '重试</button></div>' +
+                    '</div>' +
+                    '<div class="progress">' +
+                    '<div class="progress-bar"></div>' +
+                    '</div>' +
+                    '</div>';
+                var $item = $(html);
+
+                if (!isFile) {
+                    //服务端显示数据时
+                    var $preview;  //根据文件后缀进行展示预览结果
+                    if(/(.jpg|.png|.gif|.bmp|.jpeg)$/.test(name.toLocaleLowerCase())) {
+                        $preview = $('<img src="'+ data.src + '"/>');
+                    } else {
+                        $preview = this.getThumbErrorPreview(data.name, this.thumbnailHeight, this.thumbnailWidth);
+                    }
+                    $item.append($preview);
+                } else {
+                    $item.attr("id", data.id);
+                    $item.append('<div class="state ready">等待上传...</div>');
+                    this.showPreview($item, data);  //显示预览效果
+                }
+                return $item[0];
+            },
+            fileQueued: function (file) {  //文件被添加进队列
+                var self = this;
+                var $item = $(this.renderItem(true, file));
+                var $fileList = this.$elements.$fileList;
+                $fileList.append($item);  //显示在文件列表中
+                self.loadUploadFileBtnStyle();  //加载上传按钮样式
+                $item.on("click", 'button', function () {
+                    var $this = $(this);
+                    if($this.parents(".file-retry")[0]) {
+                        self.retryFile($item, file);
+                    } else if ($this.parents(".file-delete")[0]) {
+                        self.deleteFile($item, file);
+                    }
+                });
+                self.loadChooseFileBtnStyle();
+            },
+            //移除文件时
+            fileDequeued: function (file) {
+                this.loadUploadFileBtnStyle();
+            },
+            uploadProgress: function (file, percentage) {  //文件上传过程中创建进度条
+                var $item = this.getItem(file);
+                $item.find('.file-delete, .preview-tips').addClass("uploading");  //隐藏删除按钮、提示文字
+                $item.removeClass("retry");  //移除重试class
+                $item.find('.progress').show();  //显示进度条
+                var $percent = $item.find('.progress .progress-bar');
+                $percent.css('width', percentage * 100 + '%');
+            },
+            uploadComplete: function (file) {  //完成上传时，无论成功或者失败
+                var $item = this.getItem(file);
+                $item.find('.progress').fadeOut();
+                $item.find('.file-delete, .preview-tips').removeClass("uploading");  //显示删除按钮、提示文字
+
+                this.loadChooseFileBtnStyle();
+                this.loadUploadFileBtnStyle();
+            },
+            /**
+             * 文件上传完成后的处理
+             * @param file
+             * @param data
+             */
+            uploadSuccess: function (file, data) {
+                var $item = this.getItem(file),
+                    $state = $item.find('.state');
+                $item.find('.progress').hide();
+                if (data.status) {  //上传成功时
+                    this.uploadSuccessCallbck($item, data);  //用于标识为服务端文件
+                    if (!$state.hasClass('success')) {
+                        $state.attr("class", "state success");
+                        $state.text('上传成功');
+                    }
+                    $item.removeClass("retry");
+                } else {
+                    if (!$state.hasClass('error')) {
+                        $state.attr("class", "state error");
+                        $state.text('上传失败');
+                    }
+                    $item.addClass("retry");
+                }
+            },
+            uploadSuccessCallbck: function ($item, data) {  //上传文件成功时的回调,用于标识为服务端文件
+                if($item && data) {
+                    var attrs = data.attrs;
+                    for(var key in attrs) {
+                        $item.attr(key, attrs[key]);
+                    }
+                }
+
+            },
+            /***
+             * 当文件被加入队列之前触发,若返回false则此文件不会被添加进入队列
+             * @param file
+             * @returns {boolean} 为true时可以添加到webuploader中并进行显示
+             */
+            beforeFileQueued: function(file) {
+                var fileSize = this.fileSize; //获取当前总个数
+                if(fileSize < 1) {  //无限制个数
+                    return true;
+                }
+                var currentFileSize = this.getCurrentFileSize();  //当前总个数
+                var flag = false;
+                var edit = this.edit;
+                if(edit) {  //可编辑模式时
+                    if(currentFileSize < fileSize) {
+                        flag = true;
+                    }
+                }
+                //执行beforeFileQueuedCallback回调函数
+                this.beforeFileQueuedCallback(edit, flag, file, fileSize, currentFileSize);
+                return flag;
+            },
+
+            /**
+             * 当文件被加入队列返回结果之前触发
+             * @param edit 是否可编辑
+             * @param result 是否会添加并显示
+             * @param file  --- file对象
+             * @param fileSize  --- 总文件个数
+             * @param currentFileSize  --- 当前文件个数
+             */
+            beforeFileQueuedCallback: function (edit, result, file, fileSize, currentFileSize) {
+            },
+            /**
+             * 当validate不通过时触发
+             * @param type
+             *       Q_EXCEED_SIZE_LIMIT 在设置了Q_EXCEED_SIZE_LIMIT且尝试给uploader添加的文件总大小超出这个值时
+             *       Q_TYPE_DENIED 当文件类型不满足时
+             *       Q_EXCEED_NUM_LIMIT 在设置了fileNumLimit且尝试给uploader添加的文件数量超出这个值时
+             */
+            errorTypeHanlder: function (type, file) {
+
+            },
+            uploadError: function (file) {  //文件上传失败后
+                var $item = this.getItem(file),
+                    $state = $item.find('.state');
+                if (!$state.hasClass('error')) {
+                    $state.attr("class", "state error");
+                    $state.text('上传失败');
+                }
+                $item.addClass("retry");
+                this.loadUploadFileBtnStyle();
+
+                this.uploadErrorAfter(file);
+            },
+            /**
+             * 上传失败后执行
+             * @param file
+             */
+            uploadErrorAfter: function (file) {
+
+            },
+            uploadFinished: function () {},  //文件上传完后触发
+            serverFileAttrName: "data-server-file",  //服务端文件的属性名称
+            getIsServerFile: function ($item) {  //判断文件是否是服务端文件
+                var val = $item && $item.attr(this.serverFileAttrName);
+                if(val && val === "true") {
+                    return true;
+                }
+                return false;
+            },
+            getServerFileSize: function () {  //获取服务端文件的个数
+                var $fileList = this.$elements.$fileList;
+                var size = 0;
+                var serverFileAttrName = this.serverFileAttrName;
+                if($fileList) {
+                    size = $fileList.find(".file-item["+serverFileAttrName+"='true']").size();
+                }
+                return size;
+            },
+            getItemSize: function () {  //获取当前item的文件个数
+                var $fileList = this.$elements.$fileList;
+                var size = 0;
+                if($fileList) {
+                    size = $fileList.find(".file-item").size();
+                }
+                return size;
+            },
+            getCurrentFileSize: function () {  //获取当前uploader实例中文件的个数
+                var fileStatus = WebUploaderSupport.fileStatus;
+                var $fns = this.$fns;
+                var initedSize = $fns.getFileSize(fileStatus.inited);  //初始状态个数
+                var errorSize = $fns.getFileSize(fileStatus.error);  //上传失败个数
+                var size = initedSize + errorSize + this.getServerFileSize();//最终加上服务端文件个数
+                var itemSize = this.getItemSize();
+                var result = itemSize > size ? itemSize : size;
+                return result;
+            },
+            /**
+             * 删除文件的处理逻辑，包含服务端
+             * @param $item
+             * @param file
+             */
+            deleteFile: function ($item, file) {
+                if(this.getIsServerFile($item)) {  //服务端时
+                    if(this.edit) {
+                        this.deleteServerFileCore($item, this.deleteServerFileCallback);
+                    } else {
+                        this.$fns.log("can't delete server file");
+                    }
+                } else {
+                    if(this.removeFileWithItem && file) {
+                        this.removeFileWithItem(file);
+                    }
+                    this.loadChooseFileBtnStyle();
+                }
+            },
+
+            deleteServerFileAttrName: "data-delete-url",
+            deleteServerFileCore: function ($item, deleteServerFileCallback) {
+                var self = this;
+                //获取删除的url
+                var url = $item && $item.attr(self.deleteServerFileAttrName);
+
+                var exist = deleteServerFileCallback && typeof deleteServerFileCallback === "function";
+
+                if (!exist) {
+                    self.$fns.log("webuploader support instance not has delete server file callback function.");
+                }
+
+                var hasUrl = url != null && url != "";
+
+                if (!hasUrl) {
+                    var name = $item && $item.find(".file-info").html() || "";
+                    self.$fns.log("webuploader support instance not found " + name + " delete server url.");
+                }
+                if (hasUrl && exist) {
+                    //存在函数和url时操作
+                    self.deleteServerFile($item, url, deleteServerFileCallback);
+                }
+            },
+            /**
+             * 删除服务端文件(依赖于getIsServerFile的判断结果)的业务操作,可根据实际覆盖重写(support配置中直接重写该函数即可)
+             * @param $item
+             * @param deleteServerFileCallback
+             */
+            deleteServerFile: function($item, url, deleteServerFileCallback) {
+                var self = this;
+                $.ajax({
+                    dataType: "json",
+                    type: "post",
+                    url: url,
+                    success: function (json) {
+                        deleteServerFileCallback(self, $item, json);  //通过callback执行业务操作
+                        //文件操作完成后重新加载选择按钮样式
+                        self.loadChooseFileBtnStyle();
+                    }
+                });
+            },
+            /**
+             * deleteServerFile 响应成功时的回调处理,可根据实际覆盖重写
+             * @param self 当前support对象,用于访问其他对象及函数
+             * @param $item
+             * @param data
+             */
+            deleteServerFileCallback: function (self, $item, data) {
+                if(data.status) {
+                    self.removeFileItem($item);
+                } else {
+                    alert(data.content);
+                }
+            },
+            serverFiles: [],  //加载服务端的数据,当前为 [{name:string, src: string, attrs: {}}]
+            init: function (data, $fileList) { //初始化服务端数据,及加载样式
+
+                var self = this;
+                var edit = self.edit;
+                var $files = null;
+
+                //加载服务端数据
+                if(data && data.length > 0) {
+                    for(var i in data) {
+                        var item = data[i];
+                        var $item = $(this.renderItem(false, item));
+
+                        if(!edit) {
+                            $item.addClass("not-edit");
+                        }
+
+                        self.setItemStyle($item);  //以缩略图大小设置$item宽高
+
+                        if($item && item) {
+                            var attrs = item.attrs;
+                            for(var key in attrs) {  //设置$item属性值
+                                $item.attr(key, attrs[key]);
+                            }
+                        }
+                        if(i === "0") {
+                            $files = $item;
+                        } else {
+                            $files = $files.add($item);
+                        }
+                    }
+                }
+                if($files) { //加载服务端数据
+                    $fileList.append($files);
+                    $files.on('click', '.file-delete button', function () {
+                        var $item = $(this).parents(".file-item");
+                        self.deleteFile($item);
+                    });
+                }
+
+                self.loadChooseFileBtnStyle();
+            },
+            editChange: function (edit) {  //用于根据edit改变时进行设置webuploader模式
+                var self = this;
+                self.edit = edit;
+
+                var $fileList = self.$elements.$fileList;
+                if(edit) {
+                    $fileList.children().removeClass("not-edit");
+                } else {
+                    $fileList.children().addClass("not-edit");
+                }
+                self.loadChooseFileBtnStyle();
+            },
+            getChooseFileLabel: function ($chooseFileBtn) {  //获取当前上传文件按钮对应的label,该label用于触发选择文件
+                var $label = null;
+                if($chooseFileBtn) {
+                    if($chooseFileBtn.hasClass("webuploader-container")) {
+                        $label = $chooseFileBtn.find(".webuploader-element-invisible").next("label");
+                    } else {
+                        $label = $(".webuploader-container").not(this.chooseFileBtn).find(".webuploader-element-invisible").next("label");
+                    }
+                }
+                return $label;
+            },
+            loadChooseFileBtnStyle: function () {  //根据文件个数进行展示选择文件的按钮(用于上传完成时,删除文件时，添加到队列时， 初次加载服务端数据时)
+                var self = this;
+
+                var $uploadFileBtn = self.$elements.$uploadFileBtn;
+                var $chooseFileBtn = self.$elements.$chooseFileBtn;
+
+                var $fns = self.$fns;
+                var fileSize = self.fileSize;
+                var $actions = $chooseFileBtn.parents(".actions");
+                var $actionsArea = $actions.parent(".actions-area");
+                var $label = self.getChooseFileLabel($chooseFileBtn);
+
+                if (self.edit) {  //可编辑时
+                    $actionsArea.css("height", "");
+                    $actions.show();
+                    var uploader = $fns.getUploader();
+                    if(uploader) {
+                        uploader.refresh();  //解决label按钮点击无反应
+                    }
+                    if (fileSize > 0) {
+                        var currentSize = self.getCurrentFileSize();
+                        if (fileSize === currentSize) {
+                            $label && $label.hide();
+                            $chooseFileBtn.hide();
+                            $uploadFileBtn.addClass("right");
+                        } else {
+                            $label && $label.show();
+                            $chooseFileBtn.show();
+                            $uploadFileBtn.removeClass("right");
+                        }
+                    } else {
+                        $label && $label.show();
+                        $chooseFileBtn.show();
+                        $uploadFileBtn.removeClass("right");
+                    }
+                } else {  //不可编辑时
+
+                    $actions.hide();
+                    $actionsArea.css("height", 10);
+
+                    if ($label) {
+                        $label.hide();
+                    }
+                }
+            },
+
+
+            /***
+             *
+             *  上面为已存在的配置,接下来是具体的配置
+             *
+             */
+            uploader: ".uploader.uploader2",
+            serverFiles: [
+                {"src":"../images/preview/1.jpg","name":"1.jpg","attrs":{"data-server-file":true,"data-delete-url":"api/delete"}}
+                ,{"src":"../images/preview/2.jpg","name":"2.jpg","attrs":{"data-server-file":true,"data-delete-url":"api/delete"}}
+            ],
+            fileSize: 6,
+
+            /**
+             * 删除服务端文件(依赖于getIsServerFile的判断结果)的业务操作,可根据实际覆盖重写(support配置中直接重写该函数即可)
+             * @param $item
+             * @param deleteServerFileCallback
+             */
+            deleteServerFile: function($item, url, deleteServerFileCallback) {
+                var self = this;
+                //通过callback执行业务操作,当前默认全为true
+                deleteServerFileCallback(self, $item, {status: true, content: "删除成功"});
+                //文件操作完成后重新加载选择按钮样式
+                self.loadChooseFileBtnStyle();
+            },
+            /**
+             * deleteServerFile 响应成功时的回调处理,可根据实际覆盖重写
+             * @param self 当前support对象
+             * @param $item
+             * @param data
+             */
+            deleteServerFileCallback: function (self, $item, data) {
+                if(data.status) {
+                    self.removeFileItem($item);
+                }
+                alert(data.content);
+            }
+        }
+    });
+</script>
+</body>
+</html>
