@@ -73,14 +73,18 @@ getMaxFileSize() 最大文件个数, -1时不限制
 主要参数配置(除了support外均为webuploader参数配置参数):
 {
 
-    support: { //support配置
+    support: { //support核心默认配置
         edit: true,   //是否为编辑模式
         log: false,    //是否打印信息
         multiple: true,  //默认多选
         fileSize: -1,  //文件总个数, -1时无限制
+        uploader: ".uploader",  //上传区域容器选择器,用于初始化实例
         thumbnailWidth: 150, //缩略图宽度
         thumbnailHeight: 150,
+        fileListMinHeight: 100, //fileList默认最小高度
         serverFiles: []  //服务端文件 当前为 [{name:string, src: string, attrs: {}}]
+        serverFileAttrName: "data-server-file",  //服务端文件的属性名称
+        deleteServerFileAttrName: "data-delete-url",
     }
 }
 
