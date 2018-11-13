@@ -1,19 +1,5 @@
 # WebUploaderSupport
 
-`demo演示地址`
-
-[编辑示例](https://joker-pper.github.io/WebUploaderSupport/webuploader.support/edit.html)
-
-[overload示例(可以定制(重写)函数)](https://joker-pper.github.io/WebUploaderSupport/webuploader.support/overload.html)
-
-[展示示例](https://joker-pper.github.io/WebUploaderSupport/webuploader.support/show.html)
-
-[flash示例](https://joker-pper.github.io/WebUploaderSupport/webuploader.support/flash.html)
-
-[simple示例(不依赖于ui框架)](https://joker-pper.github.io/WebUploaderSupport/webuploader.support/simple.html)
-
-
-
 WebUploaderSupport功能包括：
 
 ````
@@ -55,6 +41,19 @@ swf参数请配置正确的路径.
 
 ````
 
+`demo演示`
+
+[编辑示例](https://joker-pper.github.io/WebUploaderSupport/webuploader.support/edit.html)
+
+[override示例(定制(重写)函数,包含删除逻辑重写等)](https://joker-pper.github.io/WebUploaderSupport/webuploader.support/overload.html)
+
+[展示示例](https://joker-pper.github.io/WebUploaderSupport/webuploader.support/show.html)
+
+[flash示例](https://joker-pper.github.io/WebUploaderSupport/webuploader.support/flash.html)
+
+[simple示例(不依赖于ui框架)](https://joker-pper.github.io/WebUploaderSupport/webuploader.support/simple.html)
+
+
 
 api函数：
 ````
@@ -83,8 +82,8 @@ getMaxFileSize() 最大文件个数, -1时不限制
         thumbnailHeight: 150,
         fileListMinHeight: 100, //fileList默认最小高度
         serverFiles: []  //服务端文件 当前为 [{name:string, src: string, attrs: {}}]
-        serverFileAttrName: "data-server-file",  //服务端文件的属性名称
-        deleteServerFileAttrName: "data-delete-url",
+        serverFileAttrName: "data-server-file",  //标识为服务端文件的属性名称
+        deleteServerFileAttrName: "data-delete-url", //删除文件的url
     }
 }
 
@@ -122,7 +121,7 @@ var w1 = new WebUploaderSupport(option);
 ````
 
 ````
-删除文件返回json: (可重写deleteServerFile及deleteServerFileCallback修改提示效果,参考overload.html）
+删除文件返回json: (可重写deleteServerFile及deleteServerFileCallback修改提示效果,参考override.html）
 {
     "status": boolean, //是否上传成功
     "content": string //失败时的提示
