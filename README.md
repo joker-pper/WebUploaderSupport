@@ -69,7 +69,7 @@ getMaxFileSize() 最大文件个数, -1时不限制
 当前默认配置
 
 ````
-主要参数配置(除了support外均为webuploader参数配置参数):
+主要参数配置(除了support外均为webuploader配置参数):
 {
 
     support: { //support核心默认配置
