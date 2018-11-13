@@ -45,7 +45,7 @@ swf参数请配置正确的路径.
 
 [编辑示例](https://joker-pper.github.io/WebUploaderSupport/webuploader.support/edit.html)
 
-[override示例(定制(重写)函数,包含删除逻辑重写等)](https://joker-pper.github.io/WebUploaderSupport/webuploader.support/overload.html)
+[override示例(定制(重写)函数,包含删除逻辑重写等)](https://joker-pper.github.io/WebUploaderSupport/webuploader.support/override.html)
 
 [展示示例](https://joker-pper.github.io/WebUploaderSupport/webuploader.support/show.html)
 
