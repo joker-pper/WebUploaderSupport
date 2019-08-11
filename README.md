@@ -54,6 +54,63 @@ swf参数请配置正确的路径.
 [simple示例(不依赖于ui框架)](https://joker-pper.github.io/WebUploaderSupport/webuploader.support/simple.html)
 
 
+使用介绍：
+
+````
+    var w5 = new WebUploaderSupport({
+        server: "/webuploader-support/webUploader/save?path=webUploader"
+        ,swf: '../webuploader/Uploader.swf'  // swf文件所处路径
+        ,accept: {
+            title: 'Images',
+            extensions: 'gif,jpg,jpeg,bmp,png',
+            mimeTypes: 'image/!*'
+        }
+        ,support: {
+            fileSize: 3, //文件个数
+            multiple: false,  //单选
+            uploader: ".uploader.uploader5", //上传区域容器选择器
+            thumbnailWidth: 150, //缩略图大小
+            thumbnailHeight: 150,
+
+            //加载服务端文件
+            serverFiles: [
+                {"src":"../images/preview/1.jpg","name":"1.jpg","attrs":{"data-server-file":true,"data-delete-url":""}}
+            ],
+            
+            /**
+             * 错误类型处理
+             */
+            errorTypeHandler: function (type, file) {
+                if (type == "Q_TYPE_DENIED") {
+                    alert(file.name + "不满足格式要求");
+                }
+            },
+
+            /**
+             * 定义其他事件进行处理
+             * @param self
+             * @param uploader
+             */
+            definedEvents: function (self, uploader) {
+                uploader.on("startUpload", function () {
+                    console.log("startUpload");
+                });
+
+                uploader.on("uploadStart", function () {
+                    self.uploadStart && self.uploadStart.apply(self, arguments);
+                });
+            },
+
+            uploadStart: function (file) {
+                console.log("uploadStart");
+                console.log(file);
+            }
+        }
+    });
+
+
+````
+
 
 api函数：
 ````

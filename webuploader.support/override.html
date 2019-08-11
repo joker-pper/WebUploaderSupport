@@ -77,6 +77,7 @@
             serverFiles: [
                 {"src":"../images/preview/1.jpg","name":"1.jpg","attrs":{"data-server-file":true,"data-delete-url":"api/delete"}}
                 ,{"src":"../images/preview/2.jpg","name":"2.jpg","attrs":{"data-server-file":true,"data-delete-url":"api/delete"}}
+                ,{"src":"../images/files/1.txt","name":"1.txt","attrs":{"data-server-file":true,"data-delete-url":"api/delete"}}
             ],
             fileSize: 6,
             /**
@@ -107,8 +108,10 @@
     });
 
 
-
-
+    /**
+     * 覆盖已有方法
+     * @type {WebUploaderSupport}
+     */
     var w2 = new WebUploaderSupport({
         server: "/webuploader-support/webUploader/save?path=webUploader"
         ,swf: '../webuploader/Uploader.swf'  // swf文件所处路径
@@ -235,7 +238,7 @@
                 $fns.removeFileWithItem(file);
             },
             /**
-             *
+             * 处理文件的预览效果
              * @param isFile 是否为file对象
              * @param data
              * @returns {*}
@@ -264,6 +267,7 @@
                         $preview = this.getThumbErrorPreview(data.name, this.thumbnailHeight, this.thumbnailWidth);
                     }
                     $item.append($preview);
+                    this.setItemStyle($item);  //以缩略图大小设置$item宽高
                 } else {
                     $item.attr("id", data.id);
                     $item.append('<div class="state ready">等待上传...</div>');
@@ -317,7 +321,7 @@
                     $state = $item.find('.state');
                 $item.find('.progress').hide();
                 if (data.status) {  //上传成功时
-                    this.uploadSuccessCallbck($item, data);  //用于标识为服务端文件
+                    this.uploadSuccessCallback($item, data);  //用于标识为服务端文件
                     if (!$state.hasClass('success')) {
                         $state.attr("class", "state success");
                         $state.text('上传成功');
@@ -331,7 +335,7 @@
                     $item.addClass("retry");
                 }
             },
-            uploadSuccessCallbck: function ($item, data) {  //上传文件成功时的回调,用于标识为服务端文件
+            uploadSuccessCallback: function ($item, data) {  //上传文件成功时的回调,用于标识为服务端文件
                 if($item && data) {
                     var attrs = data.attrs;
                     for(var key in attrs) {
@@ -380,7 +384,7 @@
              *       Q_TYPE_DENIED 当文件类型不满足时
              *       Q_EXCEED_NUM_LIMIT 在设置了fileNumLimit且尝试给uploader添加的文件数量超出这个值时
              */
-            errorTypeHanlder: function (type, file) {
+            errorTypeHandler: function (type, file) {
 
             },
             uploadError: function (file) {  //文件上传失败后
@@ -402,7 +406,9 @@
             uploadErrorAfter: function (file) {
 
             },
-            uploadFinished: function () {},  //文件上传完后触发
+            uploadFinished: function () {
+                console.log(arguments);
+            },  //文件上传完后触发
             serverFileAttrName: "data-server-file",  //服务端文件的属性名称
             getIsServerFile: function ($item) {  //判断文件是否是服务端文件
                 var val = $item && $item.attr(this.serverFileAttrName);
@@ -524,12 +530,9 @@
                     for(var i in data) {
                         var item = data[i];
                         var $item = $(this.renderItem(false, item));
-
                         if(!edit) {
                             $item.addClass("not-edit");
                         }
-
-                        self.setItemStyle($item);  //以缩略图大小设置$item宽高
 
                         if($item && item) {
                             var attrs = item.attrs;

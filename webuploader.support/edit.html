@@ -90,6 +90,25 @@
             </div>
         </div>
     </div>
+
+
+    <div class="uploader uploader5">
+        <div class="message">
+            可以尝试文件拖拽，或者点击选择图片按钮，来体验此demo。
+            <br />
+            <br />
+            个数为6,单选, 可编辑.
+        </div>
+        <div class="wrapper">
+            <div class="file-list"></div>
+        </div>
+        <div class="actions-area">
+            <div class="actions">
+                <div class="filePicker action">选择图片</div>
+                <button class="uploadFile action upload-btn disabled">上传图片</button>
+            </div>
+        </div>
+    </div>
 </div>
 
 <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
@@ -120,7 +139,7 @@
             fileSize: 1,
             multiple: false,  //单选
             uploader: ".uploader.uploader2",
-            errorTypeHanlder: function (type, file) {
+            errorTypeHandler: function (type, file) {
                 if (type == "Q_TYPE_DENIED") {
                     alert(file.name + "不满足格式要求");
                 }
@@ -148,9 +167,63 @@
             mimeTypes: '*'
         }
         ,support: {
-            uploader: ".uploader.uploader4",
+            uploader: ".uploader.uploader4"
         }
     });
+
+
+
+    var w5 = new WebUploaderSupport({
+        server: "/webuploader-support/webUploader/save?path=webUploader"
+        ,swf: '../webuploader/Uploader.swf'  // swf文件所处路径
+        ,accept: {
+            title: 'Images',
+            extensions: 'gif,jpg,jpeg,bmp,png',
+            mimeTypes: 'image/!*'
+        }
+        ,support: {
+            fileSize: 3,
+            multiple: false,  //单选
+            uploader: ".uploader.uploader5", //上传区域容器选择器
+            thumbnailWidth: 150, //缩略图大小
+            thumbnailHeight: 150,
+
+            //加载服务端文件
+            serverFiles: [
+                {"src":"../images/preview/1.jpg","name":"1.jpg","attrs":{"data-server-file":true,"data-delete-url":""}}
+            ],
+
+            /**
+             * 错误类型处理
+             */
+            errorTypeHandler: function (type, file) {
+                if (type == "Q_TYPE_DENIED") {
+                    alert(file.name + "不满足格式要求");
+                }
+            },
+
+            /**
+             * 定义其他事件进行处理
+             * @param self
+             * @param uploader
+             */
+            definedEvents: function (self, uploader) {
+                uploader.on("startUpload", function () {
+                    console.log("startUpload");
+                });
+
+                uploader.on("uploadStart", function () {
+                    self.uploadStart && self.uploadStart.apply(self, arguments);
+                });
+            },
+
+            uploadStart: function (file) {
+                console.log("uploadStart");
+                console.log(file);
+            }
+        }
+    });
+
 
 </script>
 </body>

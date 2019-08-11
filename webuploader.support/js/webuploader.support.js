@@ -35,6 +35,11 @@ function WebUploaderSupport(options) {
                 }
             }
         },
+        logWarn: function (content) {
+            if(console) {
+                console.warn(content);
+            }
+        },
         getUploader: function () {
             var uploader = webUploaderSupportInstance.uploader;
             return uploader;
@@ -153,6 +158,44 @@ function WebUploaderSupport(options) {
             return self.thumbnailHeight * ratio;
         },
         /**
+         * 处理文件的预览效果
+         * @param isFile 是否为file对象
+         * @param data
+         * @returns {*}
+         */
+        renderItem: function (isFile, data) {
+            var name = data.name || "";
+            var html =
+                '<div class="file-item thumbnail">' +
+                '<div class="file-info">' + name + '</div>' +
+                '<div class="file-operations">' +
+                '<div class="file-delete">' + '<button type="button">' + '删除</button></div>' +
+                '<div class="file-retry">' + '<button type="button">' + '重试</button></div>' +
+                '</div>' +
+                '<div class="progress">' +
+                '<div class="progress-bar"></div>' +
+                '</div>' +
+                '</div>';
+            var $item = $(html);
+
+            if (!isFile) {
+                //服务端显示数据时
+                var $preview;  //根据文件后缀进行展示预览结果
+                if(/(.jpg|.png|.gif|.bmp|.jpeg)$/.test(name.toLocaleLowerCase())) {
+                    $preview = $('<img src="'+ data.src + '"/>');
+                } else {
+                    $preview = this.getThumbErrorPreview(data.name, this.thumbnailHeight, this.thumbnailWidth);
+                }
+                $item.append($preview);
+                this.setItemStyle($item);  //以缩略图大小设置$item宽高
+            } else {
+                $item.attr("id", data.id);
+                $item.append('<div class="state ready">等待上传...</div>');
+                this.showPreview($item, data);  //显示预览效果
+            }
+            return $item[0];
+        },
+        /**
          * 获取不能预览的文件的样式,可覆盖(可根据名称解析后返回img对象显示)
          * @param name 文件名
          * @param thumbnailHeight
@@ -224,175 +267,6 @@ function WebUploaderSupport(options) {
             var $fns = this.$fns;
             $fns.removeFileWithItem(file);
         },
-        /**
-         *
-         * @param isFile 是否为file对象
-         * @param data
-         * @returns {*}
-         */
-        renderItem: function (isFile, data) {
-            var name = data.name || "";
-            var html =
-                '<div class="file-item thumbnail">' +
-                    '<div class="file-info">' + name + '</div>' +
-                    '<div class="file-operations">' +
-                        '<div class="file-delete">' + '<button type="button">' + '删除</button></div>' +
-                        '<div class="file-retry">' + '<button type="button">' + '重试</button></div>' +
-                    '</div>' +
-                    '<div class="progress">' +
-                        '<div class="progress-bar"></div>' +
-                    '</div>' +
-                '</div>';
-            var $item = $(html);
-
-            if (!isFile) {
-                //服务端显示数据时
-                var $preview;  //根据文件后缀进行展示预览结果
-                if(/(.jpg|.png|.gif|.bmp|.jpeg)$/.test(name.toLocaleLowerCase())) {
-                    $preview = $('<img src="'+ data.src + '"/>');
-                } else {
-                    $preview = this.getThumbErrorPreview(data.name, this.thumbnailHeight, this.thumbnailWidth);
-                }
-                $item.append($preview);
-            } else {
-                $item.attr("id", data.id);
-                $item.append('<div class="state ready">等待上传...</div>');
-                this.showPreview($item, data);  //显示预览效果
-            }
-            return $item[0];
-        },
-        fileQueued: function (file) {  //文件被添加进队列
-            var self = this;
-            var $item = $(this.renderItem(true, file));
-            var $fileList = this.$elements.$fileList;
-            $fileList.append($item);  //显示在文件列表中
-            self.loadUploadFileBtnStyle();  //加载上传按钮样式
-            $item.on("click", 'button', function () {
-                var $this = $(this);
-                if($this.parents(".file-retry")[0]) {
-                    self.retryFile($item, file);
-                } else if ($this.parents(".file-delete")[0]) {
-                    self.deleteFile($item, file);
-                }
-            });
-            self.loadChooseFileBtnStyle();
-        },
-        //移除文件时
-        fileDequeued: function (file) {
-            this.loadUploadFileBtnStyle();
-        },
-        uploadProgress: function (file, percentage) {  //文件上传过程中创建进度条
-            var $item = this.getItem(file);
-            $item.find('.file-delete, .preview-tips').addClass("uploading");  //隐藏删除按钮、提示文字
-            $item.removeClass("retry");  //移除重试class
-            $item.find('.progress').show();  //显示进度条
-            var $percent = $item.find('.progress .progress-bar');
-            $percent.css('width', percentage * 100 + '%');
-        },
-        uploadComplete: function (file) {  //完成上传时，无论成功或者失败
-            var $item = this.getItem(file);
-            $item.find('.progress').fadeOut();
-            $item.find('.file-delete, .preview-tips').removeClass("uploading");  //显示删除按钮、提示文字
-
-            this.loadChooseFileBtnStyle();
-            this.loadUploadFileBtnStyle();
-        },
-        /**
-         * 文件上传完成后的处理
-         * @param file
-         * @param data
-         */
-        uploadSuccess: function (file, data) {
-            var $item = this.getItem(file),
-                $state = $item.find('.state');
-            $item.find('.progress').hide();
-            if (data.status) {  //上传成功时
-                this.uploadSuccessCallbck($item, data);  //用于标识为服务端文件
-                if (!$state.hasClass('success')) {
-                    $state.attr("class", "state success");
-                    $state.text('上传成功');
-                }
-                $item.removeClass("retry");
-            } else {
-                if (!$state.hasClass('error')) {
-                    $state.attr("class", "state error");
-                    $state.text('上传失败');
-                }
-                $item.addClass("retry");
-            }
-        },
-        uploadSuccessCallbck: function ($item, data) {  //上传文件成功时的回调,用于标识为服务端文件
-            if($item && data) {
-                var attrs = data.attrs;
-                for(var key in attrs) {
-                    $item.attr(key, attrs[key]);
-                }
-            }
-
-        },
-        /***
-         * 当文件被加入队列之前触发,若返回false则此文件不会被添加进入队列
-         * @param file
-         * @returns {boolean} 为true时可以添加到webuploader中并进行显示
-         */
-        beforeFileQueued: function(file) {
-            var fileSize = this.fileSize; //获取当前总个数
-            if(fileSize < 1) {  //无限制个数
-                return true;
-            }
-            var currentFileSize = this.getCurrentFileSize();  //当前总个数
-            var flag = false;
-            var edit = this.edit;
-            if(edit) {  //可编辑模式时
-                if(currentFileSize < fileSize) {
-                    flag = true;
-                }
-            }
-            //执行beforeFileQueuedCallback回调函数
-            this.beforeFileQueuedCallback(edit, flag, file, fileSize, currentFileSize);
-            return flag;
-        },
-
-        /**
-         * 当文件被加入队列返回结果之前触发
-         * @param edit 是否可编辑
-         * @param result 是否会添加并显示
-         * @param file  --- file对象
-         * @param fileSize  --- 总文件个数
-         * @param currentFileSize  --- 当前文件个数
-         */
-        beforeFileQueuedCallback: function (edit, result, file, fileSize, currentFileSize) {
-        },
-        /**
-         * 当validate不通过时触发
-         * @param type
-         *       Q_EXCEED_SIZE_LIMIT 在设置了Q_EXCEED_SIZE_LIMIT且尝试给uploader添加的文件总大小超出这个值时
-         *       Q_TYPE_DENIED 当文件类型不满足时
-         *       Q_EXCEED_NUM_LIMIT 在设置了fileNumLimit且尝试给uploader添加的文件数量超出这个值时
-         */
-        errorTypeHanlder: function (type, file) {
-
-        },
-        uploadError: function (file) {  //文件上传失败后
-            var $item = this.getItem(file),
-                $state = $item.find('.state');
-            if (!$state.hasClass('error')) {
-                $state.attr("class", "state error");
-                $state.text('上传失败');
-            }
-            $item.addClass("retry");
-            this.loadUploadFileBtnStyle();
-
-            this.uploadErrorAfter(file);
-        },
-        /**
-         * 上传失败后执行
-         * @param file
-         */
-        uploadErrorAfter: function (file) {
-
-        },
-        uploadFinished: function () {},  //文件上传完后触发
         getIsServerFile: function ($item) {  //判断文件是否是服务端文件
             var val = $item && $item.attr(this.serverFileAttrName);
             if(val && val === "true") {
@@ -515,8 +389,6 @@ function WebUploaderSupport(options) {
                         $item.addClass("not-edit");
                     }
 
-                    self.setItemStyle($item);  //以缩略图大小设置$item宽高
-
                     if($item && item) {
                         var attrs = item.attrs;
                         for(var key in attrs) {  //设置$item属性值
@@ -607,6 +479,199 @@ function WebUploaderSupport(options) {
                     $label.hide();
                 }
             }
+        },
+
+        // <---   处理事件  --->
+        // https://fex.baidu.com/webuploader/doc/index.html#WebUploader_Uploader_events
+
+        /**
+         * 当文件被加入队列之前触发,若返回false则此文件不会被添加进入队列
+         * @param file
+         * @returns {boolean} 为true时可以添加到webuploader中并进行显示
+         */
+        beforeFileQueued: function(file) {
+            var fileSize = this.fileSize; //获取当前总个数
+            if(fileSize < 1) {  //无限制个数
+                return true;
+            }
+            var currentFileSize = this.getCurrentFileSize();  //当前总个数
+            var flag = false;
+            var edit = this.edit;
+            if(edit) {  //可编辑模式时
+                if(currentFileSize < fileSize) {
+                    flag = true;
+                }
+            }
+            //执行beforeFileQueuedCallback回调函数
+            this.beforeFileQueuedCallback(edit, flag, file, fileSize, currentFileSize);
+            return flag;
+        },
+
+        /**
+         * 当文件被加入队列以后触发
+         * @param file
+         */
+        fileQueued: function (file) {  //文件被添加进队列
+            var self = this;
+            var $item = $(this.renderItem(true, file));
+            var $fileList = this.$elements.$fileList;
+            $fileList.append($item);  //显示在文件列表中
+            self.loadUploadFileBtnStyle();  //加载上传按钮样式
+            $item.on("click", 'button', function () {
+                var $this = $(this);
+                if($this.parents(".file-retry")[0]) {
+                    self.retryFile($item, file);
+                } else if ($this.parents(".file-delete")[0]) {
+                    self.deleteFile($item, file);
+                }
+            });
+            self.loadChooseFileBtnStyle();
+        },
+
+        /**
+         * 当文件被移除队列后触发
+         * @param file
+         */
+        fileDequeued: function (file) {
+            this.loadUploadFileBtnStyle();
+        },
+
+        /**
+         * 当某个文件的分块在发送前触发,主要用来询问是否要添加附带参数,大文件在开起分片上传的前提下此事件可能会触发多次
+         * @param block
+         * @param data 默认的上传参数,可以扩展此对象来控制上传参数
+         * @param headers 可以扩展此对象来控制上传头部
+         */
+        uploadBeforeSend: function (block, data, headers) {
+
+        },
+
+        /**
+         * 上传过程中触发,携带上传进度
+         * @param file
+         * @param percentage 上传进度
+         */
+        uploadProgress: function (file, percentage) {  //文件上传过程中创建进度条
+            var $item = this.getItem(file);
+            $item.find('.file-delete, .preview-tips').addClass("uploading");  //隐藏删除按钮、提示文字
+            $item.removeClass("retry");  //移除重试class
+            $item.find('.progress').show();  //显示进度条
+            var $percent = $item.find('.progress .progress-bar');
+            $percent.css('width', percentage * 100 + '%');
+        },
+
+        /**
+         * 不管成功或者失败,文件上传完成时触发
+         * @param file
+         */
+        uploadComplete: function (file) {  //完成上传时，无论成功或者失败
+            var $item = this.getItem(file);
+            $item.find('.progress').fadeOut();
+            $item.find('.file-delete, .preview-tips').removeClass("uploading");  //显示删除按钮、提示文字
+
+            this.loadChooseFileBtnStyle();
+            this.loadUploadFileBtnStyle();
+        },
+
+        /**
+         * 文件上传完成后的处理
+         * @param file
+         * @param data
+         */
+        uploadSuccess: function (file, data) {
+            var $item = this.getItem(file),
+                $state = $item.find('.state');
+            $item.find('.progress').hide();
+            if (data.status) {  //上传成功时
+                this.uploadSuccessCallback($item, data);  //用于标识为服务端文件
+                if (!$state.hasClass('success')) {
+                    $state.attr("class", "state success");
+                    $state.text('上传成功');
+                }
+                $item.removeClass("retry");
+            } else {
+                if (!$state.hasClass('error')) {
+                    $state.attr("class", "state error");
+                    $state.text('上传失败');
+                }
+                $item.addClass("retry");
+            }
+        },
+
+        /**
+         * 当所有文件上传结束时触发
+         */
+        uploadFinished: function () {
+
+        },
+
+        /**
+         * 当validate不通过时触发(对应error事件)
+         * @param type
+         *       Q_EXCEED_SIZE_LIMIT 在设置了Q_EXCEED_SIZE_LIMIT且尝试给uploader添加的文件总大小超出这个值时
+         *       Q_TYPE_DENIED 当文件类型不满足时
+         *       Q_EXCEED_NUM_LIMIT 在设置了fileNumLimit且尝试给uploader添加的文件数量超出这个值时
+         */
+        errorTypeHandler: function (type, file) {
+
+        },
+
+        /**
+         * 当文件上传出错时触发
+         * @param file
+         */
+        uploadError: function (file) {  //文件上传失败后
+            var $item = this.getItem(file),
+                $state = $item.find('.state');
+            if (!$state.hasClass('error')) {
+                $state.attr("class", "state error");
+                $state.text('上传失败');
+            }
+            $item.addClass("retry");
+            this.loadUploadFileBtnStyle();
+
+            this.uploadErrorAfter(file);
+        },
+
+        /**
+         * 当文件被加入队列返回结果之前触发
+         * @param edit 是否可编辑
+         * @param result 是否会添加并显示
+         * @param file  --- file对象
+         * @param fileSize  --- 总文件个数
+         * @param currentFileSize  --- 当前文件个数
+         */
+        beforeFileQueuedCallback: function (edit, result, file, fileSize, currentFileSize) {
+        },
+
+        /**
+         * 上传失败后执行
+         * @param file
+         */
+        uploadErrorAfter: function (file) {
+
+        },
+        /**
+         * 上传文件成功时的回调,用于标识为服务端文件
+         * @param $item 当前文件item
+         * @param data 服务端数据
+         */
+        uploadSuccessCallback: function ($item, data) {
+            if($item && data) {
+                //设置当前文件item属性值
+                var attrs = data.attrs;
+                for(var key in attrs) {
+                    $item.attr(key, attrs[key]);
+                }
+            }
+        },
+
+        /**
+         * 用于定义其他事件处理
+         * @param self
+         * @param uploader uploader实例
+         */
+        definedEvents: function (self, uploader) {
         }
     };
 
@@ -684,9 +749,7 @@ function WebUploaderSupport(options) {
             }
 
         }  catch (e) {
-            if(console) {
-                console.log(e);
-            }
+            $fns.logWarn(e);
         }
 
 
@@ -740,10 +803,17 @@ function WebUploaderSupport(options) {
                 support.uploadFinished && support.uploadFinished.apply(support, arguments);
             });
 
-            uploader.on('error', function () {
-                support.errorTypeHanlder && support.errorTypeHanlder.apply(support, arguments);
+            uploader.on("uploadBeforeSend", function () {
+                support.uploadBeforeSend && support.uploadBeforeSend.apply(support, arguments);
+
             });
 
+            uploader.on('error', function () {
+                support.errorTypeHandler && support.errorTypeHandler.apply(support, arguments);
+            });
+
+            //处理当前未定义的事件
+            support.definedEvents && support.definedEvents.apply(support, [support, uploader]);
         }
     });
 
