@@ -757,6 +757,9 @@ function WebUploaderSupport(options) {
 
             webUploaderSupportInstance.uploader = uploader;
 
+            //实例化后进行调用filePicker对应的元素结构会正常
+            uploader.refresh();
+
             if($uploadFileBtn && $uploadFileBtn[0]) {
                 $uploadFileBtn.click(function () {
                     $fns.upload();
