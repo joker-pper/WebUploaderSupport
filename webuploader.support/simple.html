@@ -20,7 +20,7 @@
 <div class="container">
     <div class="uploader uploader1">
         <div class="message">
-            用于展示样式较通用不依赖前端ui框架
+            用于展示样式较通用不依赖前端ui框架 (无法删除默认展示服务端的文件，删除时会在console存在调试日志)
         </div>
         <div class="wrapper">
             <div class="file-list"></div>
@@ -53,6 +53,7 @@
         ,support:  {
             uploader: ".uploader.uploader1",  //上传区域容器选择器
             edit: true,
+            log: true,    //是否打印信息
             fileSize: 6,  //文件总个数, -1时无限制
 
             serverFiles: [
